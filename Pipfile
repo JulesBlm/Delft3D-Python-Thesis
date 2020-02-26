@@ -1,0 +1,38 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+matplotlib = "*"
+ipywidgets = "*"
+seaborn = "*"
+scipy = "*"
+altair = "*"
+ipympl = "*"
+scikit-image = "*"
+cmocean = "*"
+xarray = "*"
+numpy = "*"
+pyvista = "*"
+pandas = "*"
+pvgeo = "*"
+holoviews = "*"
+hvplot = "*"
+ipyvolume = "*"
+jupyterlab = "*"
+netcdf4 = "*"
+widgetsnbextension = "*"
+datashader = "*"
+dask = "*"
+bezier = "*"
+pyqt5 = "*"
+imageio-ffmpeg = "*"
+itkwidgets = "*"
+panel = "*"
+pint = "*"
+
+[requires]
+python_version = "3.7"

@@ -1,0 +1,14 @@
+.venv/
+Keywords.ipynb
+.DS_STORE
+.svn
+ExampleNotebooks
+.vscode/
+.ipynb_checkpoints
+.ipynb_checkpoints/*
+./pydelft
+pydelft
+MiscJunk/
+MiscJunk
+generated/
+gridded/
