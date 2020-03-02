@@ -69,7 +69,7 @@ def read(mdf_file):
       >> inp,_ = mdf.read('a.mdf')
       >> inp   = mdf.read('a.mdf')[0]"""
 
-    keywords = {}  # empty dictionary
+    keywords = {}
     keyword_order = []
 
     f = open(mdf_file, "r")
@@ -124,23 +124,31 @@ def _val2RHS_(f, keyword, value):
 
     if type(value) is str:
         if keyword == "Runtxt":
+            # Mangles the runtext
             width = 30
             f.write(f"{keyword.ljust(7)}= #{str(value[:width])}#\n")
             for i in range(width, len(value), width):
                 f.write(f"         #{value[i : i + width]}#\n")
         else:
-            f.write(f"{keyword.ljust(7)} = #{value}#\n")
+            # Write these as strings
+            f.write(f"{keyword.ljust(7)}= #{value}#\n")
     else:
-        if keyword in columnwise_list: # Write these in scientific notation and column-wise
-            f.write(f"{keyword.ljust(7)}= {formatSci(value[0])}\n")
+        # Write these in scientific notation and column-wise
+        if keyword in columnwise_list:
+            f.write(f"{keyword.ljust(7)}=  {formatSci(value[0])}\n")
             for val in value[1:]:
-                f.write(f"         {formatSci(val[0])}\n")
+                f.write(f"          {formatSci(val[0])}\n")
         else: 
-            if keyword in ['MNKmax', 'Iter', 'ncFormat', 'ncDeflate', 'Dt', 'Tzone', 'Restid_timeindex']: # Write these as simple integers
-                f.write(keyword.ljust(7) + "= " + " ".join(("%g" % x) for x in value) + "\n")
+            # Write these as simple integers
+            if keyword in ['MNKmax', 'Iter', 'ncFormat', 'ncDeflate', 'Dt', 'Tzone', 'Restid_timeindex']: 
+                joined_integer_values = " ".join(("%g" % x) for x in value)
+                integer_string_to_write = f"{keyword.ljust(7)}= {joined_integer_values}\n"
+                f.write(integer_string_to_write)
                 return
-
-            f.write(keyword.ljust(7) + "= " + " ".join(formatSci(x) for x in value) + "\n")
+            # Write these in scientific notation
+            joined_values = "  ".join(formatSci(x) for x in value)
+            sci_string_to_write = f"{keyword.ljust(7)}=  {joined_values}\n"
+            f.write(sci_string_to_write)
 
 def write(keywords, mdf_file, **kwargs):
 

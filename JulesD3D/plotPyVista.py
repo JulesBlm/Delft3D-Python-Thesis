@@ -10,19 +10,25 @@ def easyTimeFormat(datetimestring):
     '''Formats np.datetime64 to string with Day hours minutes seconds'''
     t = to_datetime(str(datetimestring)) 
     timestring = t.strftime("Day %d %H:%M:%S")
+    print(datetimestring)
     return timestring
 
-
-def makeBottomSurface(trim, mystery_flag=False):
+# bottom_surface = makeBottomSurface(trim)
+# TODO Make parent MakeBottom surface function/class and inherit from that
+def makeBottomSurfaceAtTimestep(trim, timestep=-1, mystery_flag=False):
+    '''
+    Default is last timestep
+    '''
     trim = fixCORs(trim)
     if 'depth_center' not in trim:
         trim = fixMeshGrid(trim, trim.XZ.values, trim.YZ.values, mystery_flag=True)    
     
     plot_x_mesh = trim.XCOR.values[:-1,:-1]
     plot_y_mesh = trim.YCOR.values[:-1,:-1]
-    plot_z_mesh = -trim.DP0.values[:-1,:-1]
+    plot_z_mesh = -trim.DPS.isel(time=-1).values[:-1,:-1]
     
     bottom_surface = pv.StructuredGrid(plot_x_mesh, plot_y_mesh, plot_z_mesh)
+    bottom_surface["Depth"] = plot_z_mesh.ravel(order="F")
     
     return bottom_surface
     

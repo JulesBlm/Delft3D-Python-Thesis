@@ -122,7 +122,7 @@ def addUnderlayerCoords(nc):
 def makeBottomStress(nc):
     # Bottom stress ( ('Bottom stress in U-point', 'TAUKSI'), ('Bottom stress in V-point', 'TAUETA'))
     bottom_stress_sum = vector_sum(nc.TAUKSI.values, nc.TAUETA.values)
-    nc['bottom_stress'] = (nc.TAUKSI.dims, bottom_stress_sum)  
+    nc['bottom_stress'] = (('time', 'M', 'N'), bottom_stress_sum)  
     nc['bottom_stress'].attrs = {'long_name': 'Bottom stress', 'units': 'N/m2', 'grid': 'grid', 'location': 'edge1'}            
 
     return nc
@@ -174,7 +174,7 @@ def dropJunk(nc):
          'SBUUA, SBVVA',\
          'SSUUA', 'SSVVA',\
          'GSQS', 'ALFAS',\
-         'DPS0', 'DPU0', 'DPV0',
+         'DPU0', 'DPV0',\
          'DXX01', 'DXX02', 'DXX03', 'DXX04', 'DXX05',\
          'PPARTITION',\
          'TAUMAX', 'UMNLDF',\
@@ -186,6 +186,7 @@ def dropJunk(nc):
          'KCS', 'KFU', 'KFV', 'KCU', 'KCV',\
          'MORFAC', 'MORFT', 'MFTAVG', 'MORAVG'
     ]
+     #DPS0', 
     
     nc = nc.drop(drop_list, errors='ignore')    
     print('Done dropping variables.')    

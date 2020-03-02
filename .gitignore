@@ -2,7 +2,6 @@
 Keywords.ipynb
 .DS_STORE
 .svn
-ExampleNotebooks
 .vscode/
 .ipynb_checkpoints
 .ipynb_checkpoints/*
@@ -11,4 +10,3 @@ pydelft
 MiscJunk/
 MiscJunk
 generated/
-gridded/
