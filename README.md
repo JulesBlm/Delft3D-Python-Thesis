@@ -2,7 +2,11 @@
 
 Some sane tools for my thesis too ease the pain of having to work with Delft3D-FLOW's insane file formats.
 
-The folder JulesD3D contains some tools to write or read .grd, .dep, .enc and.bnd files. A script to generate DELFT3D-FLOW v4 depth files with a smoothened slope break and a script that prepares folders for restarting from previous simulation (multipleruns.py). 
+The folder JulesD3D contains some tools
+* To write or read grid (`.grd`), depth ( `.dep`), enclosure (`.enc`)
+* Read and write boundary condition (`.bcc`, `.bct`) files.
+* A script to generate DELFT3D-FLOW4 depth files with a smoothened slope break
+* A script that prepares subsequent models for restarting from previous simulation (multipleruns.py). 
 
 Furthermore there are some notebooks to
 
@@ -13,11 +17,13 @@ Furthermore there are some notebooks to
   * [PyVista](https://www.pyvista.org) for 3D plotting both hydrodynamic and underlayer properties
   * Matplotlib plus some widgets to quickly make some plots [abandoned]
   
+  
+## Multirun script
 * Auto-generate multiple Delft3D-FLOW files  for multiple subsequent (restarting) simulations
 
   * Master Defenition File (.mdf)
 
-    * Add `Restid='identifier'+ run_nr`
+    * Adds `Restid='identifier'+ run_nr`, get's the identifier from the .mdf filename
     * Change smoothing time to zero `Tlfsmo = 0.0000000e+000`
     * Change times of restart and history files:
 
@@ -25,25 +31,22 @@ Furthermore there are some notebooks to
 
     `Flhis = TStart output_time_step(remains the same) Tend`
 
+    * Calculates restart time step and add `Restid_timeindex` keyword and value, this is the only way to restart from a netCDF map file
+
   * Morphology .mor file
 
-    * `MorStt  = 0`
+    * Resets morphological smoothing time `MorStt  = 0`
 
   * .bcc, .bct, .sed files
 
-    * Add duration of simulation to all times
+    * Adds duration of one simulation to all time steps
 
-* Generate multiple grid (.grd) and depth (.dep) files
+  * 
 
-* Generate and read associated enclosure (.enc) files
-
-* Read boundary condition (.BCT) files
-
-* Write boundary condition files
 
 ### Disclaimer
 
-This is very much a work in progress so it's all still very messy and hacky:  ¯\_(ツ)_/¯.  I use this to visualise the results of modelling turbidites in Delft3D, if you're looking for tools to visualize Delft3D ocean or river modelling I'd suggest to look at one of these libraries
+This is very much a work in progress so it's all still very messy and hacky:  ¯\_(ツ)_/¯.  I use this to visualise the results of modelling turbidity currents in Delft3D. If you're looking for tools to visualize Delft3D ocean or river modelling I'd suggest to look at one of these libraries
 
 * [Geoviews](http://geoviews.org/)
 * [xrviz](https://xrviz.readthedocs.io/en/latest/)
@@ -53,32 +56,30 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
 * [Iris](https://scitools.org.uk/iris/docs/latest/)
 * [gridgeo](https://pyoceans.github.io/gridgeo/gridgeo_tour.html)
 
-## Small To Do list
+## Potential To Do list
 
 2. Use Panel for better & cleaner widgets, both for hvPlot and for PyVista
   
 3. Properly structure JulesD3D folder as package
 
-3. Finish cleanNetCDF function!
+4. Use ufuncs to increase performance
 
-  - Use ufuncs to increase performance
+5. Move notebooks to separate folders
 
-4. Move notebooks to separate folders
-
-5. ~~Plot according to grid. Delft3D uses a staggered grid and an equidistant sigma ocean grid for depth.~~ **DONE**
+6. ~~Plot according to grid. Delft3D uses a staggered grid and an equidistant sigma ocean grid for depth.~~ **DONE**
 
    - ~~Plot vertical cross-section on true bathymetry ie scale sigma layers to their thickness~~
    - Better vertical coordinates ( [Maybe use this](https://github.com/jbusecke/xarrayutils/blob/master/doc/vertical_coords.ipynb) )
    - Make holoviews animation of side cross-section, doesn't work right now/very slow
-   - Check location of values on staggered grid (face vs edge etc)
+   - Check location of values on staggered grid (face vs edge etc) maybe use parts of gridded
 
-6. ~~Get Holoviews write to animation file working~~
+7. ~~Get Holoviews write to animation file working~~
 
-7. ~~Use DataShader to speed up plotting with HoloViews/hvPlot~~
+8. ~~Use DataShader to speed up plotting with HoloViews/hvPlot~~
 
-8. ~~Bottom animations with true bathymetry with PyVista~~
+9. ~~Bottom animations with true bathymetry with PyVista~~
 
-9. ~~3D volumes with [PyVista](https://docs.pyvista.org/)~~
+10. ~~3D volumes with [PyVista](https://docs.pyvista.org/)~~
 
    * ~~Old approach: Voxilize point cloud~~ (Abandoned because a grid is much nicer to work with and more true to the model)
 
@@ -118,9 +119,8 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
    	
    	
 
-10. Improve code quality and clean notebooks! Less hardcoded variables, more functions
-  1. Move more functions to separate files
-  2. Read up on Python OOP
+11. Improve code quality and clean notebooks. Less hardcoded variables, more functions
+   2. Read up on Python OOP and how to structure packages
 
 ## Credits
 

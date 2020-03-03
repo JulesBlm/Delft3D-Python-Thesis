@@ -1,4 +1,8 @@
-# TODO: READ ABOUT OOP BOY
+# TODO: READ ABOUT OOP
+# turn this into a class
+# turn seperate functions into classes?
+# leave it as is?
+# TODO: Use ufuncs for vector sums
 
 from JulesD3D.processing_2d import vector_sum
 import xarray as xr
@@ -44,29 +48,32 @@ def fixMeshGrid(nc, XZ, YZ, mystery_flag=False):
     '''
     Remake mesh grid to plot because delft3d cuts gridmesh values outside of enclosure out causing matplotlib and hvplot to go haywire
     Get gridsteps and lengths from nc file
-    Assumes unifrom
+    Assumes uniform grid, curved grid wont work!
+    References to XZ and YZ need to be passed explicitly because xarray loads the netCDF lazily
+    The mystery flag is a Boolean because sometimes 1 and sometimes 2 gridsteps need to be subtracted from the length ¯\_(ツ)_/¯ , don't know why
     '''
-    print("Fixing mesh grid, assuming a uniform grid")
+    print("------ Fixing mesh grid, assuming a uniform grid ------")
     x_gridstep = XZ[2][-1] - XZ[1][-1]
     y_gridstep = YZ[-2][-1] - YZ[-2][-2]
     
     width = (XZ.shape[0]-2) * x_gridstep
     if mystery_flag:
-        length = (XZ.shape[1]-1) * y_gridstep # eeehhh hmmmm -1? sometimes -2?
+        length = (XZ.shape[1] - 1) * y_gridstep # eeehhh hmmmm -1? sometimes -2?
     else: 
-        length = (XZ.shape[1]-2) * y_gridstep # eeehhh hmmmm -1? sometimes -2?        
+        length = (XZ.shape[1] - 2) * y_gridstep # eeehhh hmmmm -1? sometimes -2?        
     
     print("x_gridstep", x_gridstep)
     print("y_gridstep", y_gridstep)
-    print("width", width)
-    print("length", length)
+    print("width\t\t", width)
+    print("length\t\t", length)
     
     XZ, YZ = makeMeshGrid(length=length, width=width, x_gridstep=x_gridstep, y_gridstep=y_gridstep)
 
-    print('original XZ', nc.XZ.shape)
-    print('original YZ', nc.YZ.shape)
-    print('new XZ', XZ.shape)
-    print('new YZ', YZ.shape)
+    # for debugging
+    # print('original XZ', nc.XZ.shape)
+    # print('original YZ', nc.YZ.shape)
+    # print('new XZ', XZ.shape)
+    # print('new YZ', YZ.shape)
     nc.XZ.values = XZ
     nc.YZ.values = YZ
     
@@ -119,11 +126,14 @@ def addUnderlayerCoords(nc):
     
     return nc
 
-def makeBottomStress(nc):
-    # Bottom stress ( ('Bottom stress in U-point', 'TAUKSI'), ('Bottom stress in V-point', 'TAUETA'))
-    bottom_stress_sum = vector_sum(nc.TAUKSI.values, nc.TAUETA.values)
-    nc['bottom_stress'] = (('time', 'M', 'N'), bottom_stress_sum)  
-    nc['bottom_stress'].attrs = {'long_name': 'Bottom stress', 'units': 'N/m2', 'grid': 'grid', 'location': 'edge1'}            
+# This only works for sets that don;t have nested values
+def addVectorSum(nc, U_comp, V_comp, key="summed", attrs={}, dims=('time', 'M', 'N')):
+    '''Adds summed DataArray to new key in DataSet and drops components from DataSet'''
+    summed = vector_sum(nc[U_comp].values, nc[V_comp].values)
+    nc[key] = (dims, summed)
+    nc[key].attrs = attrs
+        
+    nc = nc.drop_vars([U_comp, V_comp])
 
     return nc
 
@@ -132,81 +142,92 @@ def makeVelocity(nc):
     velocity_sum = vector_sum(nc.U1.values, nc.V1.values) # Velocity per layer
     nc['velocity'] = (('time',  'KMAXOUT_RESTR', 'M', 'N',), velocity_sum)
     nc['velocity'].attrs = {'long_name': 'Velocity per layer', 'units': 'm/s', 'grid': 'grid', 'location': 'edge1'}
+    
+    # why am i doing this again?
     nc['velocity']  = nc.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
-    nc['velocity'] = nc.velocity.assign_coords(depth=(('time', 'M', 'N', 'KMAXOUT_RESTR'), nc['depth_center'].values))
+    nc['velocity'] = nc.velocity.assign_coords(depth=(('time', 'M', 'N', 'KMAXOUT_RESTR'), nc['depth_center'].values)) # for pyvista?
     
     return nc
 
-def makeVectorSumsSediments(nc):
-    #### Make vector sums for each sediment
-    bed_load_dims = nc.SSVV.isel(LSED=0).dims
-    susp_load_dims = nc.SSUU.isel(LSED=0).dims
-
-    sediments = [str(sediment.rstrip()) for sediment in nc.NAMCON.values]
+def makeVectorSumsSediments(nc, sediment_datavars=[]): # thats a bad name man
+    '''
+    Loops of all constituents (sediments) found in DataSet and sums their vector components and add them to DataSet,
+    
+    '''
+    if not sediment_datavars:
+        print("The provided list of keywords is empty, Stopping")
+        return
+    
+    sediments = [str(sediment.rstrip()) for sediment in nc.NAMCON.isel(time=0).values]
 
     for i, sediment in enumerate(sediments):
-        print ('----------------', sediment, i, '----------------')
-        # Add bed load transport vector sum for each sediment
-        bed_load_values = vector_sum(nc.SBUU.isel(LSEDTOT=i).values, nc.SBVV.isel(LSEDTOT=i).values)
-        long_name_bed_load = 'Bed load transport ' + sediment[2:-1].lower()
-        bed_load_name = 'bl_transp_' + sediment[2:-1]
-
-        nc[bed_load_name] = (bed_load_dims, bed_load_values)
-        nc[bed_load_name].attrs = {'long_name': long_name_bed_load, 'units': 'm3/(s m)', 'grid': 'grid', 'location': 'edge1'}
-
-        # Add suspended load transport vector sum for each sediment
-        susp_load_values = vector_sum(nc.SSVV.isel(LSED=i).values, nc.SSUU.isel(LSED=i).values) # Suspended-load transport   
-        long_name_susp_load = 'Suspended-load transport ' + sediment[2:-1].lower()
-        susp_load_name = 'sp_transport_' + sediment[2:-1]
-
-        nc[susp_load_name] = (susp_load_dims, susp_load_values)
-        nc[susp_load_name].attrs = {'long_name': long_name_susp_load, 'units': 'm3/(s m)', 'grid': 'grid', 'location': 'edge2'}
+        print('------', sediment, '------')
+        for datavar in sediment_datavars:
+            U, V = datavar['U_V_keys']
+            
+            if U in nc and V in nc:
+                new_summed_key = f"{datavar['new_key']}_{sediment[11:-1]}" # TODO: bad because this expects all constituents to be prefixed with sediment but who cares only i use this junk
+                print(new_summed_key)
+                key['attrs']['long_name'] = f"{kdatavarey['attrs']['long_name']} {sediment[2:-1]}"
+                print("New long name:", datavar['attrs']['long_name'])
+                print(f"Summing {U} and {V} for {sediment}")
+                nc = addVectorSum(nc, U, V, key=new_summed_key, attrs=datavar['attrs'], dims=key['dims'])
+            else:
+                print(f"⚠️ Keywords {U} and {V} are not present in given DataSet ⚠️")
+#                 raise Exception(f"⚠️ Keywords {U} and {V} are not present in given DataSet ⚠️")
     
+    print("Done adding summed DataArrays for ", *(sed[2:-1] for sed in sediments), "to DataSet")    
     return nc
 
-def dropJunk(nc):
+def dropJunk(nc): # vars=[]Allow array of vars to drop as argument, use one below one as default array
+    
+    #### Clean for mr Barker
+    # trim_clean = trim.drop_vars(['ALFAS', 'KCU', 'KCV', 'KCS', 'GSQS', 'PPARTITION', 'KFU', 'KFV', 'TAUKSI', 'DICWW', 'VICWW',
+    #                 'TAUETA', 'TAUMAX', 'UMNLDF', 'VMNLDF', 'SBUUA', 'SBVVA', 'SSUUA', 'SSVVA', 'MORFAC', 'MFTAVG', 'MORAVG', 'TAUETA',
+    #                            'R1', 'DG', 'MORFT', 'DM', 'VICUV', 'DPU0', 'DPV0', 'WPHY', 'DMSEDCUM', 'LYRFRAC', 'MSED', 'W', 'WS', 'RICH', 'RTUR1'], errors='ignore')
+
+    #     trim_clean.load().to_netcdf('clean_compressed_sampleD3D.nc', mode='w', engine='netcdf4', format='NETCDF4')     
+    
     # Remove component DataArrays from DataSet
     print("Dropping a bunch of DataArrays from DataSet...", end='') # SBUUA, SBVVA NOT DROPPED?
-    drop_list = [\
-         'SBUU', 'SBVV',\
-         'SSVV', 'SSUU',\
-         'TAUKSI', 'TAUETA',\
-         'SBUUA, SBVVA',\
-         'SSUUA', 'SSVVA',\
-         'GSQS', 'ALFAS',\
-         'DPU0', 'DPV0',\
-         'DXX01', 'DXX02', 'DXX03', 'DXX04', 'DXX05',\
-         'PPARTITION',\
-         'TAUMAX', 'UMNLDF',\
-         'VMNLDF',\
-         'MIN_H1', 'MAX_H1', 'MEAN_H1',\
-         'STD_H1', 'MIN_UV', 'MAX_UV', 'MEAN_UV', 'STD_UV',\
-         'MIN_SBUV', 'MAX_SBUV', 'MEAN_SBUV', 'STD_SBUV',\
-         'MIN_SSUV', 'MAX_SSUV', 'MEAN_SSUV', 'STD_SSUV',\
-         'KCS', 'KFU', 'KFV', 'KCU', 'KCV',\
+    drop_list = [
+         'SBUU', 'SBVV',
+         'SSVV', 'SSUU',
+         'TAUKSI', 'TAUETA',
+         'SBUUA, SBVVA',
+         'SSUUA', 'SSVVA',
+         'GSQS', 'ALFAS',
+         'DPU0', 'DPV0',
+         'DXX01', 'DXX02', 'DXX03', 'DXX04', 'DXX05',
+         'PPARTITION',
+         'TAUMAX', 'UMNLDF',
+         'VMNLDF',
+         'MIN_H1', 'MAX_H1', 'MEAN_H1',
+         'STD_H1', 'MIN_UV', 'MAX_UV', 'MEAN_UV', 'STD_UV',
+         'MIN_SBUV', 'MAX_SBUV', 'MEAN_SBUV', 'STD_SBUV',
+         'MIN_SSUV', 'MAX_SSUV', 'MEAN_SSUV', 'STD_SSUV',
+         'KCS', 'KFU', 'KFV', 'KCU', 'KCV',
+         'W'
          'MORFAC', 'MORFT', 'MFTAVG', 'MORAVG'
     ]
-     #DPS0', 
     
-    nc = nc.drop(drop_list, errors='ignore')    
+    nc = nc.drop_vars(drop_list, errors='ignore')    
     print('Done dropping variables.')    
-
-    # im not sure which to use?
-    # nc = nc.drop_sel(drop_list, errors='ignore')
-    # nc = nc.drop_vars(drop_list, errors='ignore')
-    # for drop_var in drop_list:
-    #     if drop_var in nc:
-    #         dropped = nc.drop_vars(drop_var)
-    #         print("Dropping", drop_var, 'from DataSet', dropped)
 
     return nc
 
 # arguments: gridstep, width, length
+# add flags for what vector sums to write
+# dict for each vector sum? [{'dims': , 'attrs': , 'key': '', }
 def writeCleanCDF(ncfilename, mystery_flag=False):
     '''
     Add vector sum for velocities and sediment transport DataArrays to DataSet
     Remove useless stuff and save new netCDF to disk
     '''
+    
+#     bottom_stress_attrs = {'long_name': 'Bottom stress', 'units': 'N/m2', 'grid': 'grid', 'location': 'edge1'}
+#     bottom_stres_dims = ('time', 'M', 'N')
+
     
     with xr.open_dataset(ncfilename, chunks={'time': 80}) as nc:
         nc = fixMeshGrid(nc, nc.XZ.values, nc.YZ.values, mystery_flag=True)
@@ -215,7 +236,8 @@ def writeCleanCDF(ncfilename, mystery_flag=False):
         print("Added depth & depth_center to DataSet")
         nc = makeVelocity(nc)
         print("Calculated velocity")
-        nc = makeBottomStress(nc)
+#         nc = makeBottomStress(nc)
+#         nc = addVectorSum(combined, 'TAUKSI', 'TAUETA', key="bottom_stress", attrs=bottom_stress_attrs, dims=bottom_stres_dims)
         print("Calculated bottom stress sum")
         nc = addUnderlayerCoords(nc)
         print("Assigned underlayer coordinates")
