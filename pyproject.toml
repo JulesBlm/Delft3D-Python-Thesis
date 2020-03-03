@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "Delft3D-Python"
+version = "0.1.0"
+description = "Some functions and notebooks to view Delft3D-Flow output"
+authors = ["JulesBlm <julesblom@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+hvplot = "^0.5.2"
+pandas = "^1.0.1"
+datashader = "^0.10.0"
+dask = {extras = ["dataframe"], version = "^2.11.0"}
+widgetsnbextension = "^3.5.1"
+netcdf4 = "^1.5.3"
+jupyterlab = "1.2.0"
+holoviews = "^1.12.7"
+numpy = "^1.18.1"
+xarray = "^0.15.0"
+ipympl = "^0.5.2"
+scipy = "^1.4.1"
+ipywidgets = "^7.5.1"
+matplotlib = "^3.1.3"
+cmocean = "^2.0"
+bezier = "^2020.2.3"
+imageio-ffmpeg = "^0.4.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

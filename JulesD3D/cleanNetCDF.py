@@ -9,17 +9,17 @@ from os import path
 #     func = lambda x, y: np.sqrt(x ** 2 + y ** 2)
 #     return xr.apply_ufunc(func, a, b)
 
-def fixCORs(trim):
+def fixCORs(nc):
     '''
     Last column and row of XCOR and YCOR are 0, this fixes that
     '''
-    trim.XCOR[-1,:] = trim.XCOR.isel(MC=-2).values + trim.XCOR.isel(MC=1).values
-    trim.XCOR[:,-1] = trim.XCOR.isel(NC=-2).values
+    nc.XCOR[-1,:] = nc.XCOR.isel(MC=-2).values + nc.XCOR.isel(MC=1).values
+    nc.XCOR[:,-1] = nc.XCOR.isel(NC=-2).values
 
-    trim.YCOR[:,-1] = trim.YCOR.isel(NC=-2).values  + trim.YCOR.isel(NC=1).values
-    trim.YCOR[-1,:] = trim.YCOR.isel(MC=-2).values
+    nc.YCOR[:,-1] = nc.YCOR.isel(NC=-2).values  + nc.YCOR.isel(NC=1).values
+    nc.YCOR[-1,:] = nc.YCOR.isel(MC=-2).values
     
-    return trim
+    return nc
 
 def makeMeshGrid(length=45000, width=18000, x_gridstep=300, y_gridstep=300):
 #     print("length:", length)
@@ -73,9 +73,9 @@ def fixMeshGrid(nc, XZ, YZ, mystery_flag=False):
     return nc
 
 def addDepth(nc):
-    # Could have set LayOut = #Y# in mdf to get lay interfaces in map nc file written during simulation
+    # Could have set LayOut = #Y# in mdf to get lay interfaces in map nc file written during simulation and worked with those values
     ##### depth at interfaces #####
-    # trim.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
+    # nc.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
     #                         height=600, width=400,
     #                         rasterize=True,
     #                         dynamic=True,
@@ -202,42 +202,26 @@ def dropJunk(nc):
     return nc
 
 # arguments: gridstep, width, length
-def writeCleanCDF(ncfilename, length=45000, width=18000, gridsteps=(300, 300)):
+def writeCleanCDF(ncfilename, mystery_flag=False):
     '''
     Add vector sum for velocities and sediment transport DataArrays to DataSet
     Remove useless stuff and save new netCDF to disk
     '''
     
     with xr.open_dataset(ncfilename, chunks={'time': 80}) as nc:
-        
-        # find a way to nicely chain these. just mutate nc for sake of ease?
-        nc = fixMeshGrid(nc, width=width, length=length)
-        print("Fixed mesh grid")
+        nc = fixMeshGrid(nc, nc.XZ.values, nc.YZ.values, mystery_flag=True)
+        print("* Fixed mesh grid") # find a way to nicely chain these. just mutate nc for sake of ease?
         nc = addDepth(nc)
         print("Added depth & depth_center to DataSet")
         nc = makeVelocity(nc)
         print("Calculated velocity")
+        nc = makeBottomStress(nc)
+        print("Calculated bottom stress sum")
         nc = addUnderlayerCoords(nc)
         print("Assigned underlayer coordinates")
         nc = dropJunk(nc)
         print("Dropped variables from DataSet")
         
-#         # Actual depth at sigma layer interfaces
-#         depth = nc.SIG_INTF @ nc.DPS
-#         depth = depth.transpose('time', 'M', 'N', 'SIG_INTF') 
-#         depth = depth.assign_attrs({"unit":"m", "long_name": "Depth at Sigma-layer interfaces"})
-#         nc.coords['depth'] = depth
-        
-#         # Actual depth center of sigma layer
-#         depth_center = nc.SIG_LYR @ nc.DPS
-#         depth_center = depth_center.transpose('time', 'M', 'N', 'SIG_LYR')
-#         depth_center = depth_center.assign_attrs({"unit":"m", "long_name": "Depth at Sigma-layer centers"})
-#         nc.coords['depth_center'] = depth_center
-        
-        # Add depth coords to Density
-        ## Why did I place KMAXOUT_RESTR as last dim again? For vertical cross-section purposes?
-#         nc['RHO'] = nc.RHO.assign_coords(depth_center=(('time', 'M', 'N', 'KMAXOUT_RESTR'), depth_center.values))
-
         root, ext = path.splitext(ncfilename)
         new_filename = root + '_clean' + ext
         
