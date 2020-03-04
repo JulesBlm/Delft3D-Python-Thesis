@@ -141,9 +141,9 @@ def makeVelocity(nc):
     # Make Horizontal velocity sum per layer
     velocity_sum = vector_sum(nc.U1.values, nc.V1.values) # Velocity per layer
     nc['velocity'] = (('time',  'KMAXOUT_RESTR', 'M', 'N',), velocity_sum)
-    nc['velocity'].attrs = {'long_name': 'Velocity per layer', 'units': 'm/s', 'grid': 'grid', 'location': 'edge1'}
+    nc['velocity'].attrs = {'long_name': 'Horizontal velocity per layer', 'units': 'm/s', 'grid': 'grid', 'location': 'edge1'}
     
-    # why am i doing this again?
+    # why am i doing this again? For pyvista right?
     nc['velocity']  = nc.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
     nc['velocity'] = nc.velocity.assign_coords(depth=(('time', 'M', 'N', 'KMAXOUT_RESTR'), nc['depth_center'].values)) # for pyvista?
     

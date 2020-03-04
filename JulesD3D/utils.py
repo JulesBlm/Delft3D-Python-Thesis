@@ -27,43 +27,9 @@ def ncFilepicker(foldername):
     
     return nc_filename
             
-def checkMinMax(section):
-    # unique, counts = np.unique(section, return_counts=True)
-    maxValue = np.amax(section)
-    minValue = np.amin(section)
-    
-    return minValue, maxValue
 
 def formatSci(floatNr):
     return format_float_scientific(floatNr, unique=False, precision=7, exp_digits=3) 
-
-def plotCrossSection(plotX, plotY, section, title, units, xLabel='x', yLabel='y', minValue=None, maxValue=None):
-    maskArray = np.equal(-999, section) # Remove -999 (null) values from section
-
-#     section = ma.masked_where(section=-999, section)
-    section = ma.array(section, mask = maskArray)
-    section[maskArray==True] = np.NaN
-    
-    if not (minValue and maxValue):
-        minValue, maxValue = checkMinMax(section)
-
-    print("Section shape", section.shape)
-    print("Min value", minValue, "Max value", maxValue)
-    
-    fig, ax_plotf = plt.subplots(figsize=(4,6))
-    fig.suptitle(title)
-    ax_plotf.set_xlabel(xLabel)
-    ax_plotf.set_ylabel(yLabel)
-
-
-    levels = MaxNLocator(nbins=15).tick_values(minValue, maxValue)
-    colormap = plt.get_cmap('viridis')
-    norm = BoundaryNorm(levels, ncolors=colormap.N)
-    
-    mesh = ax_plotf.imshow(section, cmap=colormap, norm=norm)
-    cbar = fig.colorbar(mesh, ax=ax_plotf, label=units)
-    cbar.ax.get_yaxis().labelpad = 15
-    cbar.ax.set_ylabel(units, rotation=90)
 
 def colorNegativeNaN(val):
     """
@@ -83,8 +49,9 @@ def quickDF(section):
     s = newDF.style.applymap(colorNegativeNaN)
     display(s)
     
-# Get plot variables in nice format for ipywidgets dropdown
+# Old an abondened function
 def getPlotKeyword(nc):
+    '''Get plot variables in nice format for ipywidgets dropdown'''
     dropdownOptions_horizontal = []
     dropdownOptions_underlayer = []
     dropdownOptions_vertical = []    
@@ -122,3 +89,33 @@ def getPlotKeyword(nc):
         
                 
     return [dropdownOptions_horizontal, dropdownOptions_underlayer, dropdownOptions_vertical]
+
+# Old and abondoned function
+def plotCrossSection(plotX, plotY, section, title, units, xLabel='x', yLabel='y', minValue=None, maxValue=None):
+    maskArray = np.equal(-999, section) # Remove -999 (null) values from section
+
+#     section = ma.masked_where(section=-999, section)
+    section = ma.array(section, mask = maskArray)
+    section[maskArray==True] = np.NaN
+    
+    if not (minValue and maxValue):
+        maxValue = np.amax(section)
+        minValue = np.amin(section)
+
+    print("Section shape", section.shape)
+    print("Min value", minValue, "Max value", maxValue)
+    
+    fig, ax_plotf = plt.subplots(figsize=(4,6))
+    fig.suptitle(title)
+    ax_plotf.set_xlabel(xLabel)
+    ax_plotf.set_ylabel(yLabel)
+
+
+    levels = MaxNLocator(nbins=15).tick_values(minValue, maxValue)
+    colormap = plt.get_cmap('viridis')
+    norm = BoundaryNorm(levels, ncolors=colormap.N)
+    
+    mesh = ax_plotf.imshow(section, cmap=colormap, norm=norm)
+    cbar = fig.colorbar(mesh, ax=ax_plotf, label=units)
+    cbar.ax.get_yaxis().labelpad = 15
+    cbar.ax.set_ylabel(units, rotation=90)
