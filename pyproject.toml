@@ -26,6 +26,8 @@ bezier = "^2020.2.3"
 imageio-ffmpeg = "^0.4.1"
 itkwidgets = "^0.26.0"
 pyvista = "^0.23.1"
+pvgeo = "^2.1.0"
+colorcet = "^2.0.2"
 
 [tool.poetry.dev-dependencies]
 

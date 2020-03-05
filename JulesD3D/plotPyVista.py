@@ -4,18 +4,18 @@ import xarray as xr
 from pandas import to_datetime
 import datetime
 import numpy as np
-from JulesD3D.cleanNetCDF import addDepth, fixCORs, fixMeshGrid
+from JulesD3D.processNetCDF import addDepth, fixCORs, fixMeshGrid
 
+# TODO: Day is WRONG!
 def easyTimeFormat(datetimestring):
-    '''Formats np.datetime64 to string with Day hours minutes seconds'''
+    '''Formats np.datetime64 to nice string with Day hours minutes seconds'''
     t = to_datetime(str(datetimestring)) 
-    timestring = t.strftime("Day %d %H:%M:%S")
+    timestring = t.strftime("Day %D — %H:%M:%S")
     print(datetimestring)
     return timestring
 
-# bottom_surface = makeBottomSurface(trim)
 # TODO Make parent MakeBottom surface function/class and inherit from that
-def makeBottomSurfaceAtTimestep(trim, timestep=-1, mystery_flag=False):
+def makeBottomSurface(trim, timestep=-1, mystery_flag=False):
     '''
     Default is last timestep
     '''

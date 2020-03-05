@@ -257,6 +257,22 @@ version = "0.3"
 
 [[package]]
 category = "main"
+description = "Landsat raster file I/O"
+name = "espatools"
+optional = false
+python-versions = "*"
+version = "0.1.0"
+
+[package.dependencies]
+numpy = ">=1.10"
+pillow = ">=5.2.0"
+properties = ">=0.4.0"
+scipy = ">=1.1"
+vectormath = ">=0.2.0"
+xmltodict = ">=0.11.0"
+
+[[package]]
+category = "main"
 description = "File-system specification"
 name = "fsspec"
 optional = false
@@ -990,12 +1006,49 @@ wcwidth = "*"
 
 [[package]]
 category = "main"
+description = "properties: an organizational aid and wrapper for validation and tab completion of class properties"
+name = "properties"
+optional = false
+python-versions = "*"
+version = "0.6.1"
+
+[package.dependencies]
+six = ">=1.7.3"
+
+[package.extras]
+full = ["pypng", "numpy (>=1.7)", "vectormath (>=0.1.4)"]
+image = ["pypng"]
+math = ["numpy (>=1.7)", "vectormath (>=0.1.4)"]
+
+[[package]]
+category = "main"
 description = "Run a subprocess in a pseudo terminal"
 marker = "python_version >= \"3.3\" and sys_platform != \"win32\" or sys_platform != \"win32\" or os_name != \"nt\" or python_version >= \"3.3\" and sys_platform != \"win32\" and (python_version >= \"3.3\" and sys_platform != \"win32\" or sys_platform != \"win32\")"
 name = "ptyprocess"
 optional = false
 python-versions = "*"
 version = "0.6.0"
+
+[[package]]
+category = "main"
+description = "Geoscientific visualization tools for VTK and ParaView"
+name = "pvgeo"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
+version = "2.1.0"
+
+[package.dependencies]
+espatools = ">=0.0.8"
+numpy = ">=1.13"
+pandas = ">=0.23.4"
+pyvista = ">=0.20.1"
+scipy = ">=1.1"
+vtk = ">=8.1"
+
+[package.extras]
+discretize = ["discretize (>=0.3.8)"]
+omf = ["omf (>=0.9.3)", "omfvista (>=0.2.0)"]
+pyproj = ["pyproj (>=1.9)"]
 
 [[package]]
 category = "main"
@@ -1270,6 +1323,17 @@ test = ["numpy", "pandas", "xarray", "pytest"]
 
 [[package]]
 category = "main"
+description = "vectormath: vector math utilities for Python"
+name = "vectormath"
+optional = false
+python-versions = "*"
+version = "0.2.2"
+
+[package.dependencies]
+numpy = ">=1.7"
+
+[[package]]
+category = "main"
 description = "VTK is an open-source toolkit for 3D computer graphics, image processing, and visualization"
 name = "vtk"
 optional = false
@@ -1317,6 +1381,14 @@ pandas = ">=0.25"
 
 [[package]]
 category = "main"
+description = "Makes working with XML feel like you are working with JSON"
+name = "xmltodict"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "0.12.0"
+
+[[package]]
+category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 marker = "python_version < \"3.8\""
 name = "zipp"
@@ -1337,7 +1409,7 @@ python-versions = "*"
 version = "0.13.0"
 
 [metadata]
-content-hash = "41caa3b449911790fadbf5b763a389ce48be08c27f0b8026afc9cb3272586021"
+content-hash = "f99f0aa932f74d39e18f5344f21b4492e05c5faa652343b12dc5ba7e95868cde"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1441,6 +1513,9 @@ defusedxml = [
 entrypoints = [
     {file = "entrypoints-0.3-py2.py3-none-any.whl", hash = "sha256:589f874b313739ad35be6e0cd7efde2a4e9b6fea91edcc34e58ecbb8dbe56d19"},
     {file = "entrypoints-0.3.tar.gz", hash = "sha256:c70dd71abe5a8c85e55e12c19bd91ccfeec11a6e99044204511f9ed547d48451"},
+]
+espatools = [
+    {file = "espatools-0.1.0.tar.gz", hash = "sha256:3c0a17fc89785b46681645ea7e0879aafec3f9616ee2e8bab614463a58293d69"},
 ]
 fsspec = [
     {file = "fsspec-0.6.2-py3-none-any.whl", hash = "sha256:00ca67c62ae642f3bded2100dd431d151c1c5965c410bf10b12480bc8eb0a9f6"},
@@ -1893,9 +1968,15 @@ prompt-toolkit = [
     {file = "prompt_toolkit-3.0.3-py3-none-any.whl", hash = "sha256:c93e53af97f630f12f5f62a3274e79527936ed466f038953dfa379d4941f651a"},
     {file = "prompt_toolkit-3.0.3.tar.gz", hash = "sha256:a402e9bf468b63314e37460b68ba68243d55b2f8c4d0192f85a019af3945050e"},
 ]
+properties = [
+    {file = "properties-0.6.1.tar.gz", hash = "sha256:b119ce4c53f4717fa29371c1bb929f422dda7ed90a4559b3583ea77389177263"},
+]
 ptyprocess = [
     {file = "ptyprocess-0.6.0-py2.py3-none-any.whl", hash = "sha256:d7cc528d76e76342423ca640335bd3633420dc1366f258cb31d05e865ef5ca1f"},
     {file = "ptyprocess-0.6.0.tar.gz", hash = "sha256:923f299cc5ad920c68f2bc0bc98b75b9f838b93b599941a6b63ddbc2476394c0"},
+]
+pvgeo = [
+    {file = "PVGeo-2.1.0.tar.gz", hash = "sha256:3cc038535bf6b26844c88e6a0abc6a58e8be01924c381e6630f5351f1699d3c6"},
 ]
 pyct = [
     {file = "pyct-0.4.6-py2.py3-none-any.whl", hash = "sha256:359eab8c91e63c705f838ccdd56548258f013de0bd3481c99775552ee2ab9de6"},
@@ -2098,6 +2179,9 @@ traittypes = [
     {file = "traittypes-0.2.1-py2.py3-none-any.whl", hash = "sha256:1340af133810b6eee1a2eb2e988f862b0d12b6c2d16f282aaf3207b782134c2e"},
     {file = "traittypes-0.2.1.tar.gz", hash = "sha256:be6fa26294733e7489822ded4ae25da5b4824a8a7a0e0c2dccfde596e3489bd6"},
 ]
+vectormath = [
+    {file = "vectormath-0.2.2.tar.gz", hash = "sha256:f9f9209d350ec89dc11e2548e0e6397c1b9489c8468eb50ce33788ee4322a7b8"},
+]
 vtk = [
     {file = "vtk-8.1.2-cp27-cp27m-macosx_10_6_x86_64.whl", hash = "sha256:ee17372ded18987480e3e07405f9b36fc4e2a0c1da1503628c4980a3957d7c98"},
     {file = "vtk-8.1.2-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:8c6809a3526c8cf06b921dec06cd672f54baa3a050124f0f19f0adb6cf283aa4"},
@@ -2126,6 +2210,10 @@ widgetsnbextension = [
 xarray = [
     {file = "xarray-0.15.0-py3-none-any.whl", hash = "sha256:b136ed823a37231058d5a197893f16b32e97f2e448746a9618c3807e927ccb05"},
     {file = "xarray-0.15.0.tar.gz", hash = "sha256:c72d160c970725201f769e80fb91cbad68d6ebf21d68fcc371385a6c950459c3"},
+]
+xmltodict = [
+    {file = "xmltodict-0.12.0-py2.py3-none-any.whl", hash = "sha256:8bbcb45cc982f48b2ca8fe7e7827c5d792f217ecf1792626f808bf41c3b86051"},
+    {file = "xmltodict-0.12.0.tar.gz", hash = "sha256:50d8c638ed7ecb88d90561beedbf720c9b4e851a9fa6c47ebd64e99d166d8a21"},
 ]
 zipp = [
     {file = "zipp-3.1.0-py3-none-any.whl", hash = "sha256:aa36550ff0c0b7ef7fa639055d797116ee891440eac1a56f378e2d3179e0320b"},

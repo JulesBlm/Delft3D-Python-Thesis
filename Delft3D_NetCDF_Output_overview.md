@@ -61,7 +61,7 @@
 | nlyrp1 | Interfaces of underlayers |-|
 | DP0  | Initial bottom depth (positive down) | (MC, NC) |
 
-## Drop these
+## Various
 | Keyword | Description |
 |-----------|-------------|
 |GSQS          | Horizontal area of computational cell |
@@ -81,7 +81,7 @@
 
 ### Stat stuff
 
-These can be turned off in the morphology file
+These can be toggled in the morphology file
 
 | Keyword | Description |
 |-----------|-------------|

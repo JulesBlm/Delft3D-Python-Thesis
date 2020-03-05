@@ -39,6 +39,8 @@ def colorNegativeNaN(val):
     """
     if val < 0:
         return 'color: red'
+    elif val == 0:
+        return 'color: grey'
     elif np.isnan(val):
         return 'color: grey'
     else:
