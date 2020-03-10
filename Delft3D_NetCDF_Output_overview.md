@@ -81,7 +81,7 @@
 
 ### Stat stuff
 
-These can be toggled in the morphology file
+These can be toggled in the morphology file under output with `StatVelocity: min, max, mean, and std`
 
 | Keyword | Description |
 |-----------|-------------|

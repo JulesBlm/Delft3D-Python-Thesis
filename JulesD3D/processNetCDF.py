@@ -119,7 +119,6 @@ def addUnderlayerCoords(nc):
     '''
     
     nc['MSED'] = nc.MSED.assign_coords(nlyr=nc.nlyr.values)
-    nc['MSED'] = nc.MSED.assign_coords(nlyr=nc.nlyr.values)
     nc['LYRFRAC'] = nc.LYRFRAC.assign_coords(nlyr=nc.nlyr.values)
     nc['DP_BEDLYR'] = nc.DP_BEDLYR.assign_coords(nlyrp1=nc.nlyrp1.values)
     
