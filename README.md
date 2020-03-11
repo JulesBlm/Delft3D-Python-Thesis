@@ -2,11 +2,12 @@
 
 Some sane tools for my thesis too ease the pain of having to work with Delft3D-FLOW's insane file formats.
 
-The folder JulesD3D contains some tools
-* To write or read grid (`.grd`), depth ( `.dep`), enclosure (`.enc`)
+The folder JulesD3D contains some scripts to
+* Write or read grid (`.grd`), depth ( `.dep`), enclosure (`.enc`)
 * Read and write boundary condition (`.bcc`, `.bct`) files.
-* A script to generate DELFT3D-FLOW4 depth files with a smoothened slope break
-* A script that prepares subsequent models for restarting from previous simulation (multipleruns.py). 
+* Declaratively generate a  DELFT3D-FLOW4 bathymetry model (depth, grid, enclosure) with a smoothened slope break (DepthModel.py)
+* [Prepare subsequent models for restarting from previous simulation](Multirun.md) (multipleruns.py)
+* Process netCDF files for plotting with hvPlot and PyVista
 
 Furthermore there are some notebooks to
 
@@ -15,34 +16,8 @@ Furthermore there are some notebooks to
   * [hvPlot](https://hvplot.pyviz.org/) for interactive plots
   * [Holoviews](http://holoviews.org/) to write cross-section animations to .mp4 files
   * [PyVista](https://www.pyvista.org) for 3D plotting both hydrodynamic and underlayer properties
-  * Matplotlib plus some widgets to quickly make some plots [abandoned]
+  * ~~Matplotlib plus some widgets to quickly make some plots~~ [abandoned]
   
-  
-## Multirun script
-* Auto-generate multiple Delft3D-FLOW files  for multiple subsequent (restarting) simulations
-
-  * Master Defenition File (.mdf)
-
-    * Adds `Restid='identifier'+ run_nr`, get's the identifier from the .mdf filename
-    * Change smoothing time to zero `Tlfsmo = 0.0000000e+000`
-    * Change times of restart and history files:
-
-    `Flmap = TStart output_time_step(remains the same) Tend`
-
-    `Flhis = TStart output_time_step(remains the same) Tend`
-
-    * Calculates restart time step and add `Restid_timeindex` keyword and value, this is the only way to restart from a netCDF map file
-
-  * Morphology .mor file
-
-    * Resets morphological smoothing time `MorStt  = 0`
-
-  * .bcc, .bct, .sed files
-
-    * Adds duration of one simulation to all time steps
-
-  * 
-
 
 ### Disclaimer
 
@@ -81,42 +56,8 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
 
 10. ~~3D volumes with [PyVista](https://docs.pyvista.org/)~~
 
-  * Approach is like this ([Kind of like this example](https://docs.pyvista.org/examples/00-load/terrain-mesh.html#sphx-glr-examples-00-load-terrain-mesh-py))
-    
-     1. The X and Y meshgrids in the NetCDF file are repeated Nr of sigma interfaces/layers times
-     ```python
-        x_interfaces = np.repeat(trim.XCOR.values[:,:, np.newaxis], trim.SIG_INTF.size, axis=2)
-        y_interfaces = np.repeat(trim.YCOR.values[:,:, np.newaxis], trim.SIG_INTF.size, axis=2)
-     ```
-        Now all three have equal dimensions (62, 202, 81)
-     
-     2. Next we flatten/ravel these arrays, now we have three arrays of size 62 * 202 * 81= 1 014 444
-     
-     3. With column stack we get an array with x,y,z coordinates, (1014444, 3) this we can plot as point cloud
-     
-     ```python
-  		xyz_interfaces = np.column_stack((x_interface_ravel, 				y_interface_ravel, depth_ravel))
-  		xyz_interfaces.shape
-  	```
-     4. Then define a StructuredGrid and add these as its points
-  	```python
-  depth_interfaces_grid = pv.StructuredGrid()
-  depth_interfaces_grid.points = xyz_interfaces
-    ```
-
-  	5. Then set the dimensions of the StructuredGrid so PyVista/VTK can 'reconstruct' the quad cells of the mesh. According to this issue in the PyVista repo ( [Visualise a 2D image from array of x, y, z and data points](https://github.com/pyvista/pyvista-support/issues/28#issuecomment-514016207) ) this works because the nodes are in the right order.
-     ```python
-     depth_interfaces_grid.dimensions = [81, 202, 62] 
-     ```
-
-  	As it says in [the docs](https://docs.pyvista.org/core/index.html#core-api)
-  	
-  	> - A [`pyvista.StructuredGrid`](https://docs.pyvista.org/core/point-grids.html#pyvista.StructuredGrid) is a regular lattice of points aligned with an internal coordinate axes such that the connectivity can be **defined by a grid ordering**. These are commonly made from `np.meshgrid()`. The cell types of structured grids must be 2D Quads or 3D Hexahedrons. 
-  	
-  	And now we have a StructuredGrid true to the sigma-layer model (ie depth) with (in this case) 980880 cells and 1 014 444 points!
-  	
-  	
-
+  * [See this how to visualize Delft3D-Flow with PyVista](Delft3DtoPyVistaApproach.md) 
+  
 11. Improve code quality and clean notebooks. Less hardcoded variables, more functions
 
    2. Read up on Python OOP and how to structure packages

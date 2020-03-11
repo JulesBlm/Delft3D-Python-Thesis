@@ -27,7 +27,7 @@
 | DMSEDCUM  | Accumulated net sedimentation flux | (time, LSEDTOT, M, N)|
 | TAUKSI, TAUETA | Vector comps; Bottom stress in U,V - point | (time, MC, N) |
 
-## Underlayer props
+## Underlayer properties
 | Keyword | Description | Dimensions|
 |-----------|-------------|---------|
 | MSED         | Mass of sediment in layer | (time, LSEDTOT, nlyr, M, N) |
@@ -40,10 +40,12 @@
 | grid| Attributes describing [SGRID](https://sgrid.github.io/sgrid/) ||
 | DPS       | Bottom depth (sigma point) | (time, M, N) |
 | NAMCON          | Name of constituent quantity (sediments, solvents(?)) | (LSTSCI) |
-| NAMTUR          | Name of turbulent quantity| (LTUR) |
+| NAMTUR          | Name of turbulent quantities | (LTUR) |
 | SIG_LYR         | Sigma coordinates of layer centres| -|
 | SIG_INTF        | Sigma coordinates of layer interfaces|-|
 | LSTSCI          | Constituents|-|
+| LSEDTOT | Array with indices of Sediments | - |
+| LSED | Also array with indices of Sediments, no idea what the difference between this and LSEDTOT is  ¯\_(ツ)_/¯ | - |
 | KMAXOUT         | User selected output layer interfaces|-|
 | KMAXOUT_RESTR   | User selected output layer centres|-|
 | GRAVITY         | Gravitational acceleration $\left(\frac{m}{s^2}\right)$ |-|
@@ -60,6 +62,7 @@
 | nlyr | Number of underlayer |-|
 | nlyrp1 | Interfaces of underlayers |-|
 | DP0  | Initial bottom depth (positive down) | (MC, NC) |
+
 
 ## Various
 | Keyword | Description |
@@ -115,7 +118,7 @@ These can be toggled in the morphology file under output with `StatVelocity: min
 | Keyword | Description | Dimensions|
 |-----------|-------------|---------|
 |S1        | Water-level in sigma point|(time, M, N)|
-|RTUR1     | Turbulent quantity per layer in sigma point|(time, LTUR, KMAXOUT, M, N)|
+|RTUR1     | Turbulent quantity per layer in sigma point (1. Turbulent Kinetic Energy $k$ and 2. Turbulent energy dissipation $\epsilon$) |(time, LTUR, KMAXOUT, M, N)|
 |VICWW     | Vertical eddy viscosity-3D in sigma point|(time, KMAXOUT, M, N)|
 |DICWW     | Vertical eddy diffusivity-3D in sigma point|(time, KMAXOUT, M, N)|
 |RICH      | Richardson number|(time, KMAXOUT, M, N)|
