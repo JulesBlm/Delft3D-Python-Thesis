@@ -28,6 +28,7 @@ itkwidgets = "^0.26.0"
 pyvista = "^0.23.1"
 pvgeo = "^2.1.0"
 colorcet = "^2.0.2"
+bokeh = "<2.0.0" 
 
 [tool.poetry.dev-dependencies]
 

@@ -95,7 +95,8 @@ def addDepth(nc):
     depth = depth.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer interfaces"})
     
     nc.coords['depth'] = depth
-#     nc = nc.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT
+    
+#     nc = nc.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks since some xarray update, I forgot why it was necessary]
     
     ##### depth at cell centers #####
     depth_center = nc.SIG_LYR @ nc.DPS
@@ -115,7 +116,7 @@ def addDepth(nc):
 
 def addUnderlayerCoords(nc):
     '''
-    Add underlayer coordinates to these data variables, which is nice for interactive plotting with Holoviews
+    Add underlayer coordinates to these data variables, which is nice for interactive plotting with Holoviews/hvPlot
     '''
     
     nc['MSED'] = nc.MSED.assign_coords(nlyr=nc.nlyr.values)

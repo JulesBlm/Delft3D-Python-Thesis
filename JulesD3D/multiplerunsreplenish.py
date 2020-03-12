@@ -14,7 +14,7 @@ def replaceText(filename, new_filename, text_to_find, replacement_text):
 # example: makeMultipleRuns(template_folder='/Users/your_folder_with_runs/Runs/2_5050/Run',\
 #                            restId_base='trim-60km_300m_W60Channel', number_of_runs=5)
 def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, init_MorStt="9.0000000e+000",
-                     new_Tlfsmo=0, removeNetCdf=False):
+                     new_Tlfsmo=0, removeNetCdf=False, replenish=0):
     '''
     Takes a 'template_folder' and writes 'number_of_runs' new folders with times and some other parameters adjusted for subsequent restarts.
     
@@ -30,7 +30,8 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
         Tlfsmo = Time interval to smooth the hydrodynamic boundary conditions
 
     removeNetCdf: Boolean flag to omit NetCDF output keywords in .mdf file; False by default
-
+    
+    replenish: Integer TODO: exlain what this does
     
     RunTXT keyword is kind of mangled in subsequent MDF files because the OpenEarthTools mdf script joins alls runtxt strings
     '''
@@ -129,8 +130,8 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
                 shutil.copy(old_file, new_copied_file)
 
             # Change things in new MDF File
-            new_mdf_dict['Tstart'] = [new_start_time]   # Write new start time
-            new_mdf_dict['Tstop'] = [new_end_time]      # Write new end time
+            new_mdf_dict['Tstart'] = [new_start_time]   # Start time
+            new_mdf_dict['Tstop'] = [new_end_time]      # End time
             new_mdf_dict['Flmap'][0] = new_start_time   # Start of writing map file
             new_mdf_dict['Flmap'][2] = new_end_time     # End of writing map file
             new_mdf_dict['Flhis'][0] = new_start_time   # Start of writing history file
@@ -138,6 +139,10 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
 
             new_run_text = f'{original_run_text} Run {run+1:02}'
             
+            if replenish != 0:
+                if run % replenish == 0:
+                    print(f"Make run {run} siltier to replenish")
+                    new_run_text = f"¡SILTIER RUN! {new_run_text}" 
             
             new_mdf_dict['Runtxt'] = new_run_text
 
@@ -156,7 +161,8 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
             
             print("Removing morphology smoothing time")
             replaceText(template_morph_filename, new_morph_filename, old_spin_up_time_str, new_spin_up_time_str)
-            
+                
+                
             # Add runtime in boundary conidition & transport files
             for bc_filename in bc_filenames:
                 print(f"\tChanging times in {bc_filename}")
@@ -164,6 +170,44 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
                 template_filename = os.path.join(template_folder, bc_filename)
                 new_filename = os.path.join(new_run_folder, bc_filename)
                 
+                # 1. check wether this is replenishment run check wether this is the bcc file
+                if replenish != 0 and run+1 % replenish == 0 and bc_filename.endswith(".bcc"):
+                    print("------------------------------------------------------------------------")
+                    print("This run, the composition is changed to replenish silt sediment")
+                    print("------------------------------------------------------------------------")                    
+                    
+                    new_bcc_filename = "naaaah.bcc"
+                    
+                    # change the records of the bcc file to have a different composition
+                    with open(template_filename, 'r') as bcc_template, open(new_bcc_filename, 'w') as new_bcc_file:
+                        lines = bc_template.readlines()
+                        records_line_nrs = []
+                        
+                        # TODO: pass path as argument
+                        new_bcc_records = open("/Users/julesblom/ThesisPython/2575_records.txt").readlines()
+                        
+                        # Make list of line numbers of 'records'
+                        for i, line in enumerate(lines):
+                            if 'records-in-table' in line:
+                                records_in_table = int(line.split()[1]) # number of records in table
+                                start_end_line_nrs = (i + 1, i + 1 + records_in_table) # tuple containing first and last line nr's that contain records
+                                records_line_nrs.append(start_end_line_nrs)
+                    
+                        # Use line numbers of 'records' to add runtime
+                        for start_line_nr, end_line_nr in records_line_nrs:
+                            for line_nr in range(start_line_nr, end_line_nr):
+                                old_time = lines[line_nr].split('  ')[0]
+                                new_time = float(old_time) + run * init_end_time
+                                split_line[0] = formatSci(new_time) # replace time
+
+                                i = line_nr % start_line_nr # real nice haha
+                                lines[line_nr] = ' ' + new_bcc_records[i]
+                                
+                        new_bcc_file.writelines(lines)       
+
+                    # dont continue
+                    return 
+
                 # Add end times and write to new file
                 # its kinda ugly but it works
                 with open(template_filename,'r') as bc_template, open(new_filename, 'w') as new_bc_file:

@@ -9,7 +9,7 @@ version = "1.4.3"
 [[package]]
 category = "main"
 description = "Disable App Nap on OS X 10.9"
-marker = "python_version >= \"3.3\" and sys_platform == \"darwin\" or platform_system == \"Darwin\""
+marker = "sys_platform == \"darwin\" or platform_system == \"Darwin\" or python_version >= \"3.3\" and sys_platform == \"darwin\""
 name = "appnope"
 optional = false
 python-versions = "*"
@@ -32,7 +32,6 @@ tests = ["coverage", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.i
 [[package]]
 category = "main"
 description = "Specifications for callback functions passed in to an API"
-marker = "python_version >= \"3.3\""
 name = "backcall"
 optional = false
 python-versions = "*"
@@ -69,18 +68,18 @@ category = "main"
 description = "Interactive plots and applications in the browser from Python"
 name = "bokeh"
 optional = false
-python-versions = ">=3.6"
-version = "2.0.0"
+python-versions = "*"
+version = "1.4.0"
 
 [package.dependencies]
 Jinja2 = ">=2.7"
 PyYAML = ">=3.10"
-numpy = ">=1.11.3"
+numpy = ">=1.7.1"
 packaging = ">=16.8"
 pillow = ">=4.0"
 python-dateutil = ">=2.1"
-tornado = ">=5"
-typing_extensions = ">=3.7.4"
+six = ">=1.5.2"
+tornado = ">=4.3"
 
 [[package]]
 category = "main"
@@ -107,7 +106,7 @@ plots = ["colorspacious", "viscm"]
 [[package]]
 category = "main"
 description = "Cross-platform colored terminal text."
-marker = "python_version >= \"3.3\" and sys_platform == \"win32\""
+marker = "python_version >= \"3.3\" and sys_platform == \"win32\" or sys_platform == \"win32\""
 name = "colorama"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
@@ -357,7 +356,6 @@ version = "0.4.1"
 [[package]]
 category = "main"
 description = "Read metadata from Python packages"
-marker = "python_version < \"3.8\""
 name = "importlib-metadata"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
@@ -547,7 +545,6 @@ zstandard = "*"
 [[package]]
 category = "main"
 description = "An autocompletion tool for Python that can be used for text editors."
-marker = "python_version >= \"3.3\""
 name = "jedi"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
@@ -725,15 +722,14 @@ description = "I/O for many mesh formats"
 name = "meshio"
 optional = false
 python-versions = ">=3.5"
-version = "4.0.8"
+version = "4.0.9"
 
 [package.dependencies]
+importlib-metadata = "*"
 numpy = "*"
 
 [package.extras]
-all = ["h5py", "netcdf4"]
-exodus = ["netcdf4"]
-hdf5 = ["h5py"]
+all = ["netcdf4", "h5py"]
 
 [[package]]
 category = "main"
@@ -960,7 +956,7 @@ complete = ["numpy (>=1.9.0)", "pandas (>=0.19.0)", "pyzmq", "blosc"]
 [[package]]
 category = "main"
 description = "Pexpect allows easy control of interactive console applications."
-marker = "python_version >= \"3.3\" and sys_platform != \"win32\""
+marker = "python_version >= \"3.3\" and sys_platform != \"win32\" or sys_platform != \"win32\""
 name = "pexpect"
 optional = false
 python-versions = "*"
@@ -972,7 +968,6 @@ ptyprocess = ">=0.5"
 [[package]]
 category = "main"
 description = "Tiny 'shelve'-like database with concurrency support"
-marker = "python_version >= \"3.3\""
 name = "pickleshare"
 optional = false
 python-versions = "*"
@@ -1000,7 +995,6 @@ twisted = ["twisted"]
 [[package]]
 category = "main"
 description = "Library for building powerful interactive command lines in Python"
-marker = "python_version >= \"3.3\""
 name = "prompt-toolkit"
 optional = false
 python-versions = ">=3.6.1"
@@ -1142,7 +1136,7 @@ description = "Bidirectional communication for the PyViz ecosystem."
 name = "pyviz-comms"
 optional = false
 python-versions = "*"
-version = "0.7.3"
+version = "0.7.4"
 
 [package.dependencies]
 param = "*"
@@ -1328,14 +1322,6 @@ test = ["numpy", "pandas", "xarray", "pytest"]
 
 [[package]]
 category = "main"
-description = "Backported and Experimental Type Hints for Python 3.5+"
-name = "typing-extensions"
-optional = false
-python-versions = "*"
-version = "3.7.4.1"
-
-[[package]]
-category = "main"
 description = "vectormath: vector math utilities for Python"
 name = "vectormath"
 optional = false
@@ -1404,7 +1390,6 @@ version = "0.12.0"
 [[package]]
 category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-marker = "python_version < \"3.8\""
 name = "zipp"
 optional = false
 python-versions = ">=3.6"
@@ -1423,7 +1408,7 @@ python-versions = "*"
 version = "0.13.0"
 
 [metadata]
-content-hash = "f99f0aa932f74d39e18f5344f21b4492e05c5faa652343b12dc5ba7e95868cde"
+content-hash = "191690fcd86d9c3f633052d121aad4d98aecd50495b0cfe8863d5aaacb3c04c4"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1466,7 +1451,7 @@ bleach = [
     {file = "bleach-3.1.1.tar.gz", hash = "sha256:aa8b870d0f46965bac2c073a93444636b0e1ca74e9777e34f03dd494b8a59d48"},
 ]
 bokeh = [
-    {file = "bokeh-2.0.0.tar.gz", hash = "sha256:552aae6844b2b82dc6da77b17f3f0c22f600c181b4e334f4883624665245ac59"},
+    {file = "bokeh-1.4.0.tar.gz", hash = "sha256:c60d38a41a777b8147ee4134e6142cea8026b5eebf48149e370c44689869dce7"},
 ]
 cftime = [
     {file = "cftime-1.1.0-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:463637de8e961d3d72a2db3c88c0293073820629a75a94371b7323729a1325e6"},
@@ -1805,8 +1790,8 @@ matplotlib = [
     {file = "matplotlib-3.2.0.tar.gz", hash = "sha256:651d76daf9168250370d4befb09f79875daa2224a9096d97dfc3ed764c842be4"},
 ]
 meshio = [
-    {file = "meshio-4.0.8-py3-none-any.whl", hash = "sha256:35270fd59facbf4372e91f91111f66077ed813b1ebb123256b77675f1ce45faf"},
-    {file = "meshio-4.0.8.tar.gz", hash = "sha256:65da08d27a09024d335710c2941163c3b46644ffe2aeebebbe3c38040d9fc568"},
+    {file = "meshio-4.0.9-py3-none-any.whl", hash = "sha256:cc49022fad2e6f05cf78de1f890c7df3c03f34be814ec44c71faea24337cf12b"},
+    {file = "meshio-4.0.9.tar.gz", hash = "sha256:5b8b7c58b20929486c497645d9f9aa3e116ac56120336035e81b25a2d21d7359"},
 ]
 mistune = [
     {file = "mistune-0.8.4-py2.py3-none-any.whl", hash = "sha256:88a1051873018da288eee8538d476dffe1262495144b33ecb586c4ab266bb8d4"},
@@ -2019,8 +2004,8 @@ pyvista = [
     {file = "pyvista-0.23.1.tar.gz", hash = "sha256:3b4890e9134c55cba835ac6f19f9f7fae82714f59bc5fca1ea9d2a634075b3a3"},
 ]
 pyviz-comms = [
-    {file = "pyviz_comms-0.7.3-py2.py3-none-any.whl", hash = "sha256:fb88e845ff5170bee93501c2ce86a6e725b3523fb2e0f3484f09473ca57dad9a"},
-    {file = "pyviz_comms-0.7.3.tar.gz", hash = "sha256:012228bfb4fe434e564661bda1b76cd268a8be5875fa71035cd4140e0b04f22d"},
+    {file = "pyviz_comms-0.7.4-py2.py3-none-any.whl", hash = "sha256:7b3209c366c124eb0395641ab9b08d7fe64fdfc09a6433dedbf85c0031e34d52"},
+    {file = "pyviz_comms-0.7.4.tar.gz", hash = "sha256:712df4cca33dda351de754742b24361eee8e4b7c1cfb0e24f50dcb802fa25624"},
 ]
 pywavelets = [
     {file = "PyWavelets-1.1.1-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:35959c041ec014648575085a97b498eafbbaa824f86f6e4a59bfdef8a3fe6308"},
@@ -2194,11 +2179,6 @@ traitlets = [
 traittypes = [
     {file = "traittypes-0.2.1-py2.py3-none-any.whl", hash = "sha256:1340af133810b6eee1a2eb2e988f862b0d12b6c2d16f282aaf3207b782134c2e"},
     {file = "traittypes-0.2.1.tar.gz", hash = "sha256:be6fa26294733e7489822ded4ae25da5b4824a8a7a0e0c2dccfde596e3489bd6"},
-]
-typing-extensions = [
-    {file = "typing_extensions-3.7.4.1-py2-none-any.whl", hash = "sha256:910f4656f54de5993ad9304959ce9bb903f90aadc7c67a0bef07e678014e892d"},
-    {file = "typing_extensions-3.7.4.1-py3-none-any.whl", hash = "sha256:cf8b63fedea4d89bab840ecbb93e75578af28f76f66c35889bd7065f5af88575"},
-    {file = "typing_extensions-3.7.4.1.tar.gz", hash = "sha256:091ecc894d5e908ac75209f10d5b4f118fbdb2eb1ede6a63544054bb1edb41f2"},
 ]
 vectormath = [
     {file = "vectormath-0.2.2.tar.gz", hash = "sha256:f9f9209d350ec89dc11e2548e0e6397c1b9489c8468eb50ce33788ee4322a7b8"},
