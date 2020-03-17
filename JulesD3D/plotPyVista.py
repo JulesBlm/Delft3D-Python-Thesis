@@ -10,7 +10,7 @@ from JulesD3D.processNetCDF import addDepth, fixCORs, fixMeshGrid
 def easyTimeFormat(datetimestring):
     '''Formats np.datetime64 to nice string with Day hours minutes seconds'''
     t = to_datetime(str(datetimestring)) 
-    timestring = t.strftime("Day %D — %H:%M:%S")
+    timestring = t.strftime("Day %d — %H:%M:%S") #%D
     print(datetimestring)
     return timestring
 

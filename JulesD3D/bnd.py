@@ -28,7 +28,7 @@ class bnd():
 
         return boundary_coords
 
-    def getXYlistFromBndCoords(coords):
+    def getXY(coords):
         bc_x_coords, bc_y_coords = [[], []]
         for bnd in coords:
             x_coords, y_coords = list(zip(*bnd))

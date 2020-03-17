@@ -1,3 +1,4 @@
+# TODO: If uniform grid read grid cell size
 import numpy as np
 from numpy import format_float_scientific
 import datetime

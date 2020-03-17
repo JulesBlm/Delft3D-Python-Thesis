@@ -82,8 +82,8 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
 
     exclude_flags = []
     if 'FlNcdf' in mdf_dict and removeNetCdf == True:
-        print('MDF file has Netcdf flags! Removing this key to ensure DEF/DAT output')
-        print("Note that the template .mdf file will remain untouched, remove Netcdf flags manually from this file")
+        print("'removeNetCdf' is true and MDF file has Netcdf flags! Removing the NetCDF key to ensure DEF/DAT output")
+        print("Note that the first runs (ie the template) .mdf file will remain untouched, remove Netcdf flags manually from this file")
         exclude_flags = ['FlNcdf', 'ncFormat', 'ncDeflate']
     
     # init_start_time = formatSci(mdf_dict['Tstart'][0])
