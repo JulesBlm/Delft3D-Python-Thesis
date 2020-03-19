@@ -183,7 +183,7 @@ In this run, the flow composition is changed to replenish silt sediment
                         new_mdf_dict['Runtxt'] = diff_comp_run_text
 
                         # change the records of the bcc file to have a different composition
-                        with open(replenish_bcc_template_filepath, 'r') as different_compo_bcc_template, open(new_bcc_filename, 'w') as new_bcc_file:
+                        with open(replenish_bcc_template_filepath, 'r') as different_compo_bcc_template, open(new_bcc_filepath, 'w') as new_bcc_file:
                             lines = different_compo_bcc_template.readlines()
                             records_line_nrs = []
 

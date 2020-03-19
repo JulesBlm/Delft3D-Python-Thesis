@@ -122,5 +122,5 @@ These can be toggled in the morphology file under output with `StatVelocity: min
 |VICWW     | Vertical eddy viscosity-3D in sigma point|(time, KMAXOUT, M, N)|
 |DICWW     | Vertical eddy diffusivity-3D in sigma point|(time, KMAXOUT, M, N)|
 |RICH      | Richardson number|(time, KMAXOUT, M, N)|
-|VICUV     | horizontal eddy viscosity in sigma point|(time, KMAXOUT_RESTR, M, N)|
+|VICUV     | horizontal eddy viscosity in zeta point |(time, KMAXOUT_RESTR, M, N)|
 |RCA       | Near-bed reference concentration of sediment|(time, LSED, M, N)|
