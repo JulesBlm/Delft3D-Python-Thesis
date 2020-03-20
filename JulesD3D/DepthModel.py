@@ -1,6 +1,7 @@
 # TODO
-# * Check whether length and width are multiples of y-, and x-gridstep respectively.
 # * Fix bank_index (center) mess!
+# * Make nice n clear repr string
+# * Smoothen slope break direction independent
 
 from JulesD3D.dep import Dep
 from JulesD3D.grid import Grid
