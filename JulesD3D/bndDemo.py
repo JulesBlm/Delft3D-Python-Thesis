@@ -11,10 +11,7 @@ class bnd():
     def read_bnd(self, fname=None):
         '''Read a Delft3d boundary definition file'''
         if not fname:
-            print("No boundary filename given!")
-            return
-        else:
-            fname = fname
+            raise Exception("No boundary filename given!")
 
         column_names = ['name','type','forcing','m1','n1','m2','n2',
                         'reflection coefficient','vertical profile',

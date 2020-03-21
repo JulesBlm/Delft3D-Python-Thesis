@@ -1,7 +1,7 @@
 # from https://github.com/spmls/pydelft
 import pandas as pd
 
-class sed():
+class Sed():
     '''Delft3d boundary sediment file'''
     # def __init__(self, fname=None):
     #     self.readBnd(fname)
@@ -29,8 +29,8 @@ class sed():
                 keywords[keyword] = []
                 new = True
 
-        df2 = pd.DataFrame(keywords)
-        display(df2)
+        sed_df = pd.DataFrame(keywords)
+        display(sed_df)
 
         # column_names = ['name','type','forcing','m1','n1','m2','n2',
         #                 'reflection coefficient','vertical profile',
@@ -41,9 +41,4 @@ class sed():
         
         # display(data)
         
-        # boundary_coords = []
-        # nr_of_bounds = data.shape[0]
-        # for i in range(nr_of_bounds):
-        #     boundary_coords.append(([data.m1[i], data.n1[i]], [data.m2[i], data.n2[i]]))
-
         # return boundary_coords

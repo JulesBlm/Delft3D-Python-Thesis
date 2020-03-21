@@ -2,10 +2,7 @@ import os, fileinput, shutil, copy #, pprint
 from numpy import format_float_scientific
 import JulesD3D.mdf as mdf
 from JulesD3D.utils import formatSci
-
-
-
-# TODO: split into more composable functions
+w
 def replaceText(filename, new_filename, text_to_find, replacement_text):   
     with fileinput.FileInput(filename) as file, open(new_filename, 'w') as outfile: # inplace=True, backup='.bak')
         for line in file:
@@ -14,7 +11,7 @@ def replaceText(filename, new_filename, text_to_find, replacement_text):
 # example: makeMultipleRuns(template_folder='/Users/your_folder_with_runs/Runs/2_5050/Run',\
 #                            restId_base='trim-60km_300m_W60Channel', number_of_runs=5)
 def makeMultipleRunsReplenishment(template_folder=None, number_of_runs=2, restId_base=None, init_MorStt="9.0000000e+000",
-                     new_Tlfsmo=0, removeNetCdf=False, replenish=0, replenish_bcc_template_filepath=''):
+                                new_Tlfsmo=0, removeNetCdf=False, replenish=0, replenish_bcc_template_filepath=''):
     '''
     Takes a 'template_folder' and writes 'number_of_runs' new folders with times and some other parameters adjusted for subsequent restarts.
     

@@ -26,7 +26,9 @@ def ncFilepicker(foldername):
     )
     
     return nc_filename
-            
+
+def formatInt(intNr):
+    return str(int(intNr))
 
 def formatSci(floatNr):
     return format_float_scientific(floatNr, unique=False, precision=7, exp_digits=3) 

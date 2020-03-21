@@ -43,15 +43,17 @@ __version__ = "$Revision: 7870 $"
 
 import numpy as np
 
-class Dep(object):
+class Depth(object):
     """Create a Delft3D dep file
-    # Create an dep grid
-    dep = dep()
-    # Load a dep from file
-    grid = Grid.fromfile('filename.grd')
-    dep  = Dep.read('filename.dep',grid.shape)
-    # Write dep to file
-    Dep.write(dep,'filename.dep')"""
+    Create an dep grid
+        dep = Depth()
+    
+    Load a dep from file (grid has to be loaded first)
+        grid = Grid.read('filename.grd')
+        dep  = Depth.read('filename.dep',grid.shape)
+    
+    Write dep to file
+        Depth.write(dep,'filename.dep')"""
 
     def __init__(self, *args, **kwargs):
         self.properties = {}
@@ -59,7 +61,7 @@ class Dep(object):
         self.dep   = None
 
     def copy(self):
-        copy = Dep()
+        copy = Depth()
         copy.shape = self.shape
         copy.values = self.values.copy()
 
@@ -67,7 +69,7 @@ class Dep(object):
       
     @staticmethod
     def read(filename, gridshape, **kwargs):
-        dep = Dep()
+        dep = Depth()
         with open(filename, 'r') as f:
             strings = f.read()
 #             f.close

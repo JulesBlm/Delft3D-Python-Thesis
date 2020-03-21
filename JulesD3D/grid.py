@@ -2,13 +2,14 @@
 import numpy as np
 from numpy import format_float_scientific
 import datetime
+from JulesD3D.utils import formatSci, formatInt
 
 class Grid(object):
     """Create a Delft3D grid file
 	# Create an empty grid
 	grid = Grid()
 	# Load a grid from file
-	grid = Grid.fromfile('filename.grd')
+	grid = Grid.read('filename.grd')
 	# Write grid to file
 	Grid.write(grid,'filename.grd')
 	"""
@@ -21,14 +22,8 @@ class Grid(object):
 #         self.x_gridstep =
 #         self.y_gridstep = 
 
-    def formatSci(self, floatNr):
-        return format_float_scientific(floatNr, unique=False, precision=17, exp_digits=2) 
-
-    def formatInt(self, intNr):
-        return str(int(intNr))
-
     @staticmethod
-    def fromfile(filename, **kwargs):
+    def read(filename, **kwargs):
         grid = Grid()
         grid.filename = filename
         grid.shape = None
@@ -62,12 +57,9 @@ class Grid(object):
                     )
                     # also read next line
                     line = f.readline()
-                    grid.properties["xori"], grid.properties["yori"], grid.properties[
-                        "alfori"
-                    ] = np.array(line.split(), dtype="float")
-        # rows now contains
-        # [X
-        # Y]
+                    grid.properties["xori"], grid.properties["yori"], grid.properties["alfori"] = np.array(line.split(), dtype="float")
+                    
+        # rows now contain [X Y]
         data = np.array(rows, dtype="double")
         assert (data.shape[0], data.shape[1]) == (
             grid.shape[0] * 2,
@@ -89,8 +81,7 @@ class Grid(object):
         f.write("* Created at " + str(datetime.datetime.now()) + "\n")
         f.write(
             "* by Jules' modified OpenEarth Tools \n" + 
-            "* Git url: https://github.com/JulesBlm/Delft3D-Python-Tools/Jules/grid.py $\n" +
-            "* $Revision:  $\n"
+            "* Git url: https://github.com/JulesBlm/Delft3D-Python-Tools/Jules/grid.py $\n"
         )
         f.write("Coordinate System = " + self.properties["Coordinate System"] + "\n")
         coordinatesString = '      {}      {}\n'.format( self.formatInt(mDim), self.formatInt(nDim) )

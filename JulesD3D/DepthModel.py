@@ -1,4 +1,5 @@
 # TODO
+# * Not sure if this is how to Class in Python  ¯\_(ツ)_/¯
 # * Fix bank_index (center) mess!
 # * Make nice n clear repr string
 # * Smoothen slope break direction independent
@@ -6,7 +7,7 @@
 from JulesD3D.dep import Dep
 from JulesD3D.grid import Grid
 from JulesD3D.enc import writeEncFileWithChannel, writeSimpleEncFile
-from JulesD3D.bnd import bnd
+# from JulesD3D.bnd import Boundaries
 import bezier
 import numpy as np
 import math, os
@@ -42,7 +43,6 @@ class DepthModel(object):
         print("y_gridstep", self.grid['y_gridstep'])
         print("width", self.grid['width'])
         print("length", self.grid['length'])
-        
         
         if self.grid['width'] % self.grid['x_gridstep']:
             raise Exception("Width is not a multiple of x_gridstep")
@@ -251,13 +251,14 @@ class DepthModel(object):
     
         return depth_matrix_with_channel.T
     
+    @staticmethod
     def makeModelAtOnce(self):
         '''
         Performs all the generation steps and writing files at once in the right order
         '''
         self.makeNewGrid()
         self.writeGridFile()
-        self.generateBathymetrySlopeBreak()      
+        self.generateBathymetrySlopeBreak()
         self.writeDepFile()
     
     def plotCrossSection(self):

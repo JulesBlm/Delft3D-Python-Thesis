@@ -1,4 +1,5 @@
-# Delft3D-Flow Python Tools
+# Delft3D-FLOW Python Tools
+### Delft3D-FLOW for humans!
 
 Some sane tools for my thesis too ease the pain of having to work with [Delft3D-FLOW](https://oss.deltares.nl/documents/183920/185723/Delft3D-FLOW_User_Manual.pdf)'s insane file formats and to automate the tedious manual labor involved in setting up multiple succesive simulations.
 
