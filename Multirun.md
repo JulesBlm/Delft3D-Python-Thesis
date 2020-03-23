@@ -12,7 +12,7 @@
 
     `Flhis = TStart output_time_step(remains the same) Tend`
 
-    * Calculates restart time step and add `Restid_timeindex` keyword and value, this is the only way to restart from a netCDF map file
+    * Due to a bug in Delft3D, NetCDF cannot restart a map file from a specific time. Therefore the index of the output step must be used. This is restart time step is calculated automatically and added with `Restid_timeindex` keyword and value. This is the only way to restart from a netCDF map file!
 
   * Morphology .mor file
 

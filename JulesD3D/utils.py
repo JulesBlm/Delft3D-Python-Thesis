@@ -30,6 +30,13 @@ def ncFilepicker(foldername):
 def formatInt(intNr):
     return str(int(intNr))
 
+## Hmmmmm this was in dep.py
+# def formatSci(floatNr):
+#     if floatNr > 0:
+#         return ' {:13.7E}'.format(floatNr)
+#     else: 
+#         return '{:13.7E}'.format(floatNr)
+
 def formatSci(floatNr):
     return format_float_scientific(floatNr, unique=False, precision=7, exp_digits=3) 
 

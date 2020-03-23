@@ -1,8 +1,4 @@
-def formatSci(floatNr):
-  if floatNr > 0:
-     return ' {:13.7E}'.format(floatNr)
-  else: 
-     return '{:13.7E}'.format(floatNr)    
+from JulesD3D.utils import formatSci
 """read/write Delft3D-FLOW *.dep files"""
 
 __version__ = "$Revision: 7870 $"
@@ -66,32 +62,30 @@ class Depth(object):
         copy.values = self.values.copy()
 
         return copy
-      
+
+    # maybe i should rename all 'read' methods to 'fromFile' 🤔
     @staticmethod
     def read(filename, gridshape, **kwargs):
         dep = Depth()
         with open(filename, 'r') as f:
             strings = f.read()
-#             f.close
-        dep.values = np.array([float(s) for s in strings.split()])
-        # print("values before removing -999.0", dep.values)
-        dep.values[dep.values == -999.0] = np.nan
-        # print("set dep shape to 1 larger than gridshape", (gridshape[0] + 1,gridshape[1] + 1))
-        dep.shape = (gridshape[0] + 1,gridshape[1] + 1)
-        # print("dep.values", dep.values)
-        # print("dep.shape", dep.shape)
-        dep.values = np.reshape(dep.values,dep.shape)
+            
+            dep.values = np.array([float(s) for s in strings.split()])
+            dep.values[dep.values == -999.0] = np.nan
 
-        return dep
-   
+            dep.shape = (gridshape[0] + 1, gridshape[1] + 1)
+            dep.values = np.reshape(dep.values, dep.shape)
+
+            return dep
+
     @staticmethod
     def write(dep, filename, **kwargs):
         
         print("Writing .dep file with shape", dep.shape)
         dep.values[np.isnan(dep.values)] = -999.0
-      
+
         mDim, nDim  = dep.shape
-      
+
         # Original : 42 strings in lines max 12 values
         with open(filename, 'w') as f:
             nrOfRows = int(np.ceil(mDim / 12))

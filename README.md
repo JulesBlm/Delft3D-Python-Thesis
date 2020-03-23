@@ -1,5 +1,5 @@
-# Delft3D-FLOW Python Tools
-### Delft3D-FLOW for humans!
+# Delft3D-FLOW Python Tools for humans
+### Declarative Delft3D-FLOW file generation
 
 Some sane tools for my thesis too ease the pain of having to work with [Delft3D-FLOW](https://oss.deltares.nl/documents/183920/185723/Delft3D-FLOW_User_Manual.pdf)'s insane file formats and to automate the tedious manual labor involved in setting up multiple succesive simulations.
 
@@ -39,34 +39,24 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
 
 ## Potential To Do list
 
+1. Script for reading writing Morphology files
+2. Notebook giving overview of MDF file
 2. Use Panel for better & cleaner widgets, both for hvPlot and for PyVista
-  
 3. Properly structure JulesD3D folder as package
-
 4. Use ufuncs to increase performance
-
 5. Move notebooks to separate folders
-
-6. ~~Plot according to grid. Delft3D uses a staggered grid and an equidistant sigma ocean grid for depth.~~ **DONE**
-
+6. ~~Plot according to grid. Delft3D uses a staggered grid and an equidistant sigma ocean grid for depth.~~ 
    - ~~Plot vertical cross-section on true bathymetry ie scale sigma layers to their thickness~~
    - Better vertical coordinates ( [Maybe use this](https://github.com/jbusecke/xarrayutils/blob/master/doc/vertical_coords.ipynb) )
    - Make holoviews animation of side cross-section, doesn't work right now/very slow
-   - Check location of values on staggered grid (face vs edge etc) maybe use parts of gridded
-
+   - Check location of values on staggered grid (face vs edge etc) maybe use parts of Gridded
 7. ~~Get Holoviews write to animation file working~~
-
 8. ~~Use DataShader to speed up plotting with HoloViews/hvPlot~~
-
 9. ~~Bottom animations with true bathymetry with PyVista~~
-
 10. ~~3D volumes with [PyVista](https://docs.pyvista.org/)~~
-
-  * [See this how to visualize Delft3D-Flow with PyVista](Delft3DtoPyVistaApproach.md) 
-  
+	* [See this how to visualize Delft3D-Flow with PyVista](Delft3DtoPyVistaApproach.md) 
 11. Improve code quality and clean notebooks. Less hardcoded variables, more functions
-
-   2. Read up on Python OOP and how to structure packages
+	* Read up on Python OOP/classes
 
 ## Credits
 

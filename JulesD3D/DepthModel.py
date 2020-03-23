@@ -6,7 +6,7 @@
 
 from JulesD3D.dep import Dep
 from JulesD3D.grid import Grid
-from JulesD3D.enc import writeEncFileWithChannel, writeSimpleEncFile
+from JulesD3D.enc import Enclosure
 # from JulesD3D.bnd import Boundaries
 import bezier
 import numpy as np
@@ -245,9 +245,15 @@ class DepthModel(object):
         print("--- Writing enclosure file ---")
         print("xDim: ", xDim)
         print("yDim: ", yDim)
-        writeEncFileWithChannel(xDim, yDim, new_enc_filename=self.filenames['enc'],
-                                bank_left=bank_left, bank_right=bank_right+2,
-                                channel_length_index=channel_length_index-1)
+        enclosure_options = dict(
+            dims = (xDim, yDim),
+            filename=self.filenames['enc'],
+            bank_left=bank_left, bank_right=bank_right+2
+            channel_length_index=channel_length_index-1
+        )
+        
+        enc = Enclosure(**enclosure_options)
+        enclosureX, enclosureY = enc.write()
     
         return depth_matrix_with_channel.T
     

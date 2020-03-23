@@ -8,63 +8,171 @@ from JulesD3D.grid import Grid
 from JulesD3D.enc import Enclosure
 from JulesD3D.bnd import Boundaries
 from os import path, walk
-from cmocean.cm import deep
+from cmocean.cm import deep, deep_r
+import pyvista as pv
 
 colormap = deep
 
-# Make this class containing objects of grid, bnd, enc, depth, mdf, sed files, bcc, bct
-
 class D3DModel(object):
-    '''
+    """
     Read a folder containing Delft3D4-FLOW files
-    '''
-    def __init__(self, *args, **kwargs):
-        print("Ayyyyeyeyeye")
-    
-    def __repr__(self):
-        return "Reads all Delft3D files in a folder"
-    
-    @staticmethod
-    def readFolder(folderpath):
+    Displays all properties of model in a human readable overview
+    """
+    def __init__(self, folderpath=None, *args, **kwargs):
+        if not folderpath:
+            raise Exception("Can't read a folder without a folderpath  ¯\_(ツ)_/¯")
+        
         if not path.exists(folderpath):
-            raise Exception('Looks like read folder does not exist, aborting')
-    
+            raise Exception("Looks like read folder does not exist, aborting")
+        
+        self.folderpath = folderpath
+        
         basename = path.basename(folderpath)
-        plot_title, _ = path.splitext(basename)
-        title = basename
+        title, _ = path.splitext(basename)
+        self.title = title
+        self.filenames = {}
 
-        all_filenames = []
-
-        # Find filenames in template/read folder
+        df_filenames = []
+        
+        extensions = ("enc", "grd", "dep", "bcc", "bct", "sed", "tra", "mdf")
+        
+        fileproperties = [
+            {"type": "Boundary", "ext": "bnd" },
+            {"type": "MDF", "ext": "mdf" },
+            {"type": "Sediments", "ext": "sed"},
+            {"type": "Depth", "ext": "dep"},
+            {"type": "Enclosure", "ext": "enc"},
+            {"type": "Grid", "ext": "grd"},
+            {"type": "B.C. Time series", "ext": "bct"},
+            {"type": "B.C. Constituents", "ext": "bcc"},
+            {"type": "Morphology", "ext": "mor"}
+        ]
+        
+        # Find filenames in template/read folder        
         for root, dirs, files in walk(folderpath):
             for file in files:
-                if file.endswith('bnd'):
-                    bnd_filename = path.join(folderpath, file)
-                    all_filenames.append({"type": "Boundary", "filename": path.split(bnd_filename)[1]})
-                elif file.endswith('dep'):
-                    dep_filename =  path.join(folderpath, file)
-                    all_filenames.append({"type": "Depth", "filename": path.split(dep_filename)[1]})
-                elif file.endswith('enc'):
-                    enc_filename =  path.join(folderpath, file)
-                    all_filenames.append({"type": "Enclosure", "filename":path.split(enc_filename)[1]})
-                elif file.endswith('grd'):
-                    grid_filename = path.join(folderpath, file)
-                    all_filenames.append({"type": "Grid", "filename":path.split(grid_filename)[1]})
-
-        files_df  = pd.DataFrame(data=all_filenames)
+                for fileprop in fileproperties:
+                    ext = fileprop["ext"]
+                    if file.endswith(ext):
+                        df_filenames.append({"type": fileprop["type"], "filename": file})
+                        self.filenames[ext] = path.join(folderpath, file)
+        
+        files_df  = pd.DataFrame(data=df_filenames)
+        
+        print("D3D model filenames")
         display(files_df)
-        
-        self.filenames = all_filenames
-        
-    # def readGrid(self):
-        
-    #     grid = Grid.read(grid_filename)
-    #     grid.shape
 
-    #     dep = Depth.read(dep_filename, grid.shape)
-    #     depth = dep.values[0:-1,0:-1]
+        # wrap in if of try
+        self.readGrid()
+        self.readDepth()
+        self.readBoundaries()
+        self.readEnclosure()
+    
+    def __repr__(self):
+        return "Reads all Delft3D files in a folder, directs to all the other classes (WOW)"
+    
+    def readGrid(self):
+        grid = Grid.read(self.filenames["grd"])
         
-    #     boundary_coords = bnd.readBnd(fname=bnd_filename)
+        self.grid = grid
         
-        # enclosure_x, enclosure_y = readEnc(enc_filename)
+        return grid
 
+    def readDepth(self):
+        if not self.grid:
+            raise Exception("Grid needs to be read first")
+        
+        depth = Depth.read(self.filenames["dep"], self.grid.shape)
+        
+        self.depth = depth
+        
+    def readBoundaries(self):
+        bnd = Boundaries.read(self.filenames["bnd"])
+        
+        self.bnd = bnd
+    
+    def readEnclosure(self):
+        enc = Enclosure.read(self.filenames["enc"])
+        
+        self.enc = enc
+        
+    def plotMap(self):
+        # TODO: get these from self
+        
+        # x_gridcells, y_gridcells = grid.x.shape
+        x_gridstep = 200
+        y_gridstep = 200
+        
+        x_grid = self.grid.x.data[0]
+        y_grid = self.grid.y.data[:,1]
+        
+        enclosure_x = self.enc.x
+        enclosure_y = self.enc.y
+        
+        plot_enclosure_x_meters = [i * x_gridstep for i in enclosure_x]
+        plot_enclosure_y_meters = [i * y_gridstep for i in enclosure_y]
+        
+        min_depth, max_depth = [np.amin(depth), np.max(depth)]
+        
+        fig_r, ax_r = plt.subplots(nrows=1, figsize=(7, 8))
+
+        ax_r.set_title('Map view of model domain', fontsize=16)
+        ax_r.set_aspect('equal')
+        
+        # Boundary conditions
+        # ax_r.plot(bc_x_meters[1:][0], bc_y_meters[1:][0], c='coral', linewidth=7.5) #label='Zero discharge BC',
+        # text_zero_discharge = ax_r.text(8000, 35500, "Zero discharge B.C.", fontsize=13)
+        # text_zero_discharge.set_path_effects([PathEffects.withStroke(linewidth=1.5, foreground='w')])
+
+        ax_r.plot(plot_enclosure_x_meters, plot_enclosure_y_meters, c='white', linewidth=2.5, label="Enclosure")
+        grid_im = ax_r.pcolor(self.grid.x, self.grid.y, self.depth.values[0:-1,0:-1], vmin=min_depth, vmax=max_depth, cmap=deep)
+        ax_r.set_xlabel('Width $m$ [m]', fontsize=16)
+        ax_r.set_ylabel('Length $n$ [m]', fontsize=16)
+        
+        # TODO: Don't hardcode xlim and ylim
+        ax_r.set_xlim(0, 26200)
+        ax_r.set_ylim(0, 36700)
+
+        # grid
+        ax_r.set_xticks(x_grid, minor=True)
+        ax_r.set_yticks(y_grid, minor=True)
+
+        ax_r.grid(which='minor', alpha=0.15)
+        ax_r.grid(which='major', alpha=0.75)
+
+        # discharge = ax_r.scatter(discharge_location_x - 100, discharge_location_y + 400, s=[175], c='coral', marker="^", edgecolors="white") # label="Discharge BC",
+        # text_discharge = ax_r.text(discharge_location_x - 20, discharge_location_y + 450, "Discharge B.C.", fontsize=13)
+        # text_discharge.set_path_effects([PathEffects.withStroke(linewidth=1.5, foreground='w')])
+
+        # colorbar
+        cbar = fig_r.colorbar(grid_im, ax=ax_r)
+        cbar.ax.set_ylabel("Depth [m]", rotation=-90, va="bottom", fontsize=16)
+
+        # legend 
+        fig_r.legend(loc=(0.134,.383), borderpad=0.5)
+        
+        return 
+
+    def plotDepthPyVista(self, screenshot=None):
+        if not self.depth or not self.grid:
+            raise Exception("Must define grid and depth first")
+        
+        # TODO: use makeBottomSurface from ployPyVista
+        depth = self.depth.values[0:-1,0:-1]
+        plot_x_mesh = self.grid.x[:-1,:-1]
+        plot_y_mesh = self.grid.y[:-1,:-1]
+        plot_z_mesh = -depth[:-1,:-1]
+
+        bottom_surface = pv.StructuredGrid(plot_x_mesh, plot_y_mesh, plot_z_mesh)
+        bottom_surface.field_arrays['depth'] = -depth[:-1,:-1].T
+        bottom_surface
+        
+        p = pv.Plotter(notebook=True)
+        p.add_mesh(bottom_surface, cmap=deep_r, scalars='depth', ambient=0.2)
+
+        p.show_grid()
+        p.set_scale(zscale=25)
+        p.show(screenshot)
+
+    # def plotMap(self)
+        # depth = self.dep.values[0:-1,0:-1] # for plotting

@@ -23,11 +23,15 @@ class Grid(object):
 #         self.y_gridstep = 
 
     @staticmethod
-    def read(filename, **kwargs):
+    def read(filename=None, **kwargs):
+        if not filename:
+            raise Exception("No grid filename given!")
+        
         grid = Grid()
         grid.filename = filename
         grid.shape = None
         rows = []
+        
         with open(filename) as f:
             for line in f:
                 line = line.strip()
@@ -50,23 +54,16 @@ class Grid(object):
                     # line should contain size
                     # convert to nrow x ncolumns
                     grid.shape = tuple(np.array(line.split()[::-1], dtype="int"))
-                    assert (
-                        len(grid.shape) == 2
-                    ), "Expected shape (2,), got {}, (subgrids not supported)".format(
-                        grid.shape
-                    )
+                    assert (len(grid.shape) == 2), f"Expected shape (2,), got {grid.shape}, (subgrids not supported)"
+                    
                     # also read next line
                     line = f.readline()
                     grid.properties["xori"], grid.properties["yori"], grid.properties["alfori"] = np.array(line.split(), dtype="float")
                     
         # rows now contain [X Y]
         data = np.array(rows, dtype="double")
-        assert (data.shape[0], data.shape[1]) == (
-            grid.shape[0] * 2,
-            grid.shape[1],
-        ), "Expected shape of data:{} , got {}".format(
-            (grid.shape[0] * 2, grid.shape[1]), (data.shape[0], data.shape[1])
-        )
+        assert (data.shape[0], data.shape[1]) == (grid.shape[0] * 2, grid.shape[1]), f"Expected shape of data:{(grid.shape[0] * 2, grid.shape[1])} , got {(data.shape[0], data.shape[1])}"
+        
         X, Y = data[: grid.shape[0], :], data[grid.shape[0] :, :]
         grid.x = np.ma.MaskedArray(X, mask=X == 0.0)  # apply standard nodatavalue of 0
         grid.y = np.ma.MaskedArray(Y, mask=Y == 0.0)  # apply standard nodatavalue of 0

@@ -1,18 +1,6 @@
 import pandas as pd
+
 # check yDim, xDim are off by one or not
-
-#  demo enc function
-# writeEncFileWithChannel(xDim, yDim, new_filename=self.filenames['enc'],
-#                         bank_left=bank_left, bank_right=bank_right+2,
-#                         channel_length_index=channel_length_index-1)
-
-# demo make new grid
-# newGrid = Grid()
-# newGrid.x = self.grid['x_grid'] # matrix
-# newGrid.y = self.grid['y_grid'] # matrix
-# newGrid.shape = self.grid['shape'] # list
-# newGrid.properties = {'Coordinate System': 'Cartesian', 'xori': 0.0, 'yori': 0.0, 'alfori': 0.0}
-# Grid.write(newGrid, self.filenames['grid'])
 
 class Enclosure():
     '''
@@ -49,7 +37,6 @@ class Enclosure():
         else: 
             self.x = [1, xDim + 1, xDim + 1, 1, 1]
             self.y = [1, 1, yDim + 1, yDim + 1, 1]
-
 
     def __repr__(self):
         repr_string = f"New Enclosure with xDim {self.dims[0]} and yDim {self.dims[1]}"
@@ -90,6 +77,7 @@ class Enclosure():
             enc_coords = {'x': enc_x, 'y': enc_y}
             enc_coords_df = pd.DataFrame(data=enc_coords)
             
+            print("Enclosure values")
             display(enc_coords_df)
             
             Enclosure.filename = filename

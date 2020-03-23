@@ -4,7 +4,7 @@ import pandas as pd
 class Sed():
     '''Delft3d boundary sediment file'''
     # def __init__(self, fname=None):
-    #     self.readBnd(fname)
+    #     self.read(fname)
     #     # self.read_bnd(fname)
 
     def readSed(sed_filename=None): # self?
