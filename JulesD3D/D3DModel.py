@@ -17,6 +17,7 @@ class D3DModel(object):
     """
     Read a folder containing Delft3D4-FLOW files
     Displays all properties of model in a human readable overview
+    Some convenient plot methods 
     """
     def __init__(self, folderpath=None, *args, **kwargs):
         if not folderpath:
@@ -173,6 +174,10 @@ class D3DModel(object):
         p.show_grid()
         p.set_scale(zscale=25)
         p.show(screenshot)
+
+    # def plotVerticalSection(self):
+    # hmmm
+    
 
     # def plotMap(self)
         # depth = self.dep.values[0:-1,0:-1] # for plotting

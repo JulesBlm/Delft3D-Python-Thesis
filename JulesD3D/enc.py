@@ -25,13 +25,13 @@ class Enclosure():
         self.filename = kwargs.get('filename')
         xDim, yDim = self.dims
         
-        if kwargs.get("channel_length_index"):
+        if 'channel_length_index' in kwargs:
             self.channel_length_index = kwargs.get("channel_length_index")
             self.bank_left = kwargs.get('bank_left')
             self.bank_right = kwargs.get('bank_right')
             self.x = [1, self.bank_left, self.bank_left, self.bank_right, self.bank_right, xDim+1, xDim+1, 1, 1]
             self.y = [self.channel_length_index, self.channel_length_index, 1, 1, self.channel_length_index, self.channel_length_index, yDim+1, yDim+1, self.channel_length_index]
-        elif kwargs.get('read_filename'):
+        elif 'read_filename' in kwargs:
             self.x = kwargs.get('x') # list of x coords
             self.y = kwargs.get('y') # list of y coords
         else: 
@@ -71,8 +71,8 @@ class Enclosure():
             
             enc = Enclosure(dims=dims, read_filename=True, x=enc_x, y=enc_y)
             
-            Enclosure.x = enc_x
-            Enclosure.y = enc_y
+            enc.x = enc_x
+            enc.y = enc_y
 
             enc_coords = {'x': enc_x, 'y': enc_y}
             enc_coords_df = pd.DataFrame(data=enc_coords)
@@ -84,6 +84,13 @@ class Enclosure():
             
             return enc
 
+    def getXY(self):
+#         if self.x or not self.y:
+#             raise Exception("No coords in this object")
+        
+        return self.x, self.y
+        
+        
     def write(self): # Add channel_width argument
         '''
         Write enclosure file,

@@ -32,7 +32,7 @@ class Boundaries():
     '''
     def __init__(self, filename=None):
         # self.read(self, filename) # one way or the doesnt work with this way
-        self.bc_coords = []
+        self.coords = []
 
     @staticmethod
     def read(filename=None):
@@ -48,8 +48,6 @@ class Boundaries():
         bnd_df = pd.read_csv(filename, delim_whitespace=True,
                                 header=None, names=column_names)
         
-        bnd_df.name = "Boundaries"
-        
         bnd.bnd_df = bnd_df
         
         print("Boundary file")
@@ -60,19 +58,24 @@ class Boundaries():
         for i in range(nr_of_bounds):
             bc_coords.append(([bnd_df.m1[i], bnd_df.n1[i]], [bnd_df.m2[i], bnd_df.n2[i]]))
 
-        bnd.bc_coords = bc_coords
+        bnd.coords = bc_coords
         return bnd
     
-    # def display(self):
-    #   
+    def display(self):
+        if not self.bnd_df:
+            print("No DataFrame present for this boundary file")
+
+        display(self.bnd_df)
+        
+        return self.bnd_df
 
     # for plotting boundary locations 
     def getXY(self):
         if not self.coords:
-            raise Exception("The list of boundaries is empty>")
+            raise Exception("The list of boundaries coords is empty")
         
         bc_x_coords, bc_y_coords = [[], []]
-        for bnd in self.bc_coords:
+        for bnd in self.coords:
             x_coords, y_coords = list(zip(*bnd))
             bc_x_coords.append(x_coords)  # -1 ?
             bc_y_coords.append(y_coords)  # -1 ?
