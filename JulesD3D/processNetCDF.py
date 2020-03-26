@@ -79,7 +79,8 @@ def fixMeshGrid(nc, XZ, YZ, mystery_flag=False):
     return nc
 
 def addDepth(nc):
-    # Could have set LayOut = #Y# in mdf to get lay interfaces in map nc file written during simulation and worked with those values
+    # Could have set LayOut = #Y# in mdf to get LAYER_INTERFACE in map netcdf output file written during simulation and worked with those values
+    # But it's a trade-off between file size and processing time  ¯\_(ツ)_/¯
     ##### depth at interfaces #####
     # nc.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
     #                         height=600, width=400,
@@ -96,7 +97,8 @@ def addDepth(nc):
     
     nc.coords['depth'] = depth
     
-#     nc = nc.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks since some xarray update, I forgot why it was necessary]
+    # doesnt work since some update of xarray it think
+    # nc = nc.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks since some xarray update, I forgot why it was necessary]
     
     ##### depth at cell centers #####
     depth_center = nc.SIG_LYR @ nc.DPS
@@ -105,7 +107,7 @@ def addDepth(nc):
     depth_center = depth_center.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer centers"})
 
     nc.coords['depth_center'] = depth_center
-#     nc = nc.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
+    # nc = nc.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
 
     ##### Add layer thickness DataArray to Data #####
     layer_thickness = np.diff(-depth.values)

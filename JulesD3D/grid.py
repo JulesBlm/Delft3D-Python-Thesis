@@ -81,9 +81,9 @@ class Grid(object):
             "* Git url: https://github.com/JulesBlm/Delft3D-Python-Tools/Jules/grid.py $\n"
         )
         f.write("Coordinate System = " + self.properties["Coordinate System"] + "\n")
-        coordinatesString = '      {}      {}\n'.format( self.formatInt(mDim), self.formatInt(nDim) )
+        coordinatesString = '      {}      {}\n'.format( formatInt(mDim), formatInt(nDim) )
         f.write(coordinatesString)
-        properties = ' {} {} {}\n'.format(self.formatInt(self.properties["xori"]), self.formatInt(self.properties["yori"]), self.formatInt(self.properties["alfori"]) )
+        properties = ' {} {} {}\n'.format(formatInt(self.properties["xori"]), formatInt(self.properties["yori"]), formatInt(self.properties["alfori"]) )
         f.write(properties)
 
         max_m_lines = 5
@@ -93,30 +93,30 @@ class Grid(object):
         for n in range(nDim):
             lowerBound = 0
             upperBound = min(5, mDim)
-            nstr = self.formatInt(n + 1)
+            nstr = formatInt(n + 1)
 
             # Write values with ETA = x prepended            
-            ETAstring = " ETA= {:>4}   {}\n".format(nstr, "   ".join(self.formatSci(x) for x in self.x[n][lowerBound:upperBound]))
+            ETAstring = " ETA= {:>4}   {}\n".format(nstr, "   ".join(formatSci(x) for x in self.x[n][lowerBound:upperBound]))
             f.write(ETAstring)
 
             # Write remaining values in ETA = m
             for i in range(1, nrow):
                 lowerBound = i * max_m_lines
                 upperBound = min((i + 1) * max_m_lines, mDim)
-                f.write("             {}\n".format("   ".join(self.formatSci(x) for x in self.x[n][lowerBound:upperBound] )))
+                f.write("             {}\n".format("   ".join(formatSci(x) for x in self.x[n][lowerBound:upperBound] )))
 
         # ?
         for n in range(nDim):
             lowerBound = 0
             upperBound = min(max_m_lines, mDim)
-            nstr = self.formatInt(n + 1)
+            nstr = formatInt(n + 1)
         
-            lastETAstring = ' ETA= {:>4}   {}\n'.format(nstr, "   ".join(self.formatSci(y) for y in self.y[n][lowerBound:upperBound]))
+            lastETAstring = ' ETA= {:>4}   {}\n'.format(nstr, "   ".join(formatSci(y) for y in self.y[n][lowerBound:upperBound]))
             f.write(lastETAstring)
             
             for i in range(1, nrow):
                 lowerBound = i * max_m_lines
                 upperBound = min((i + 1) * max_m_lines, mDim)
-                f.write('             {}\n'.format("   ".join(self.formatSci(y) for y in self.y[n][lowerBound:upperBound])))
+                f.write('             {}\n'.format("   ".join(formatSci(y) for y in self.y[n][lowerBound:upperBound])))
 
         f.close()

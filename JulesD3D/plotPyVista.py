@@ -21,11 +21,12 @@ def makeBottomSurface(trim, timestep=-1, mystery_flag=False):
     '''
     trim = fixCORs(trim)
     if 'depth_center' not in trim:
+        print("NetCDF is not preprocessed")
         trim = fixMeshGrid(trim, trim.XZ.values, trim.YZ.values, mystery_flag=True)    
     
-    plot_x_mesh = trim.XCOR.values[:-1,:-1]
-    plot_y_mesh = trim.YCOR.values[:-1,:-1]
-    plot_z_mesh = -trim.DPS.isel(time=-1).values[:-1,:-1]
+    plot_x_mesh = trim.XCOR.values[1:-1,1:-1]
+    plot_y_mesh = trim.YCOR.values[1:-1,1:-1]
+    plot_z_mesh = -trim.DPS.isel(time=-1).values[1:-1,1:-1]
     
     bottom_surface = pv.StructuredGrid(plot_x_mesh, plot_y_mesh, plot_z_mesh)
     bottom_surface["Depth"] = plot_z_mesh.ravel(order="F")

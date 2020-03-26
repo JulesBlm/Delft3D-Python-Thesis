@@ -4,7 +4,7 @@
 # * Make nice n clear repr string
 # * Smoothen slope break direction independent
 
-from JulesD3D.dep import Dep
+from JulesD3D.dep import Depth
 from JulesD3D.grid import Grid
 from JulesD3D.enc import Enclosure
 # from JulesD3D.bnd import Boundaries
@@ -15,6 +15,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import cmocean.cm as cmo
 import matplotlib.pyplot as plt
 import traceback
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 class DepthModel(object):
     def __init__(self, **kwargs):
@@ -24,13 +26,18 @@ class DepthModel(object):
         self.bathymetry = kwargs.get("bathymetry", {})
                 
     def __repr__(self):
-        string = "Making depth model with these properties\n"
-        
+        string = f'''
+        Making grid and depth files with these properties
+        Filenames: {pp.pprint(self.filenames)}
+        Grid: {pp.pprint(self.grid)}
+        Channel: {pp.pprint(self.channel)}
+        Bathymetry: {pp.pprint(self.bathymetry)}
+        '''
         # keys = [*filenames.keys()]
         # vals = [*filenames.values()]
         # list(zip(keys, vals))
-        string += str(self.filenames.values()) + str(self.grid.values()) + str(self.channel.values()) + str(self.bathymetry.values())
-        return 'TODO: I should make a good repr string listing all the supplied values'
+        
+        return string
         
     @staticmethod
     def slopeFunction(slope_radians, length):
@@ -69,7 +76,7 @@ class DepthModel(object):
         self.grid['shape'] = (xDim, yDim)
         
     def writeDepFile(self):
-        new_depth = Dep()
+        new_depth = Depth()
         new_depth.values = self.bathymetry['depth']
         new_depth.shape = self.bathymetry['depth'].shape
         print("Writing depth file to:", self.filenames['dep'])
@@ -248,7 +255,7 @@ class DepthModel(object):
         enclosure_options = dict(
             dims = (xDim, yDim),
             filename=self.filenames['enc'],
-            bank_left=bank_left, bank_right=bank_right+2
+            bank_left=bank_left, bank_right=bank_right+2,
             channel_length_index=channel_length_index-1
         )
         

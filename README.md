@@ -54,7 +54,7 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
 8. ~~Use DataShader to speed up plotting with HoloViews/hvPlot~~
 9. ~~Bottom animations with true bathymetry with PyVista~~
 10. ~~3D volumes with [PyVista](https://docs.pyvista.org/)~~
-	* [See this how to visualize Delft3D-Flow with PyVista](Delft3DtoPyVistaApproach.md) 
+	* [See this how to visualize Delft3D-Flow with PyVista](Delft3D_to_PyVista_Approach.md) 
 11. Improve code quality and clean notebooks. Less hardcoded variables, more functions
 	* Read up on Python OOP/classes
 
