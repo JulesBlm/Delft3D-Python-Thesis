@@ -29,6 +29,7 @@ pyvista = "^0.23.1"
 pvgeo = "^2.1.0"
 colorcet = "^2.0.2"
 bokeh = "<2.0.0" 
+xarray-extras = "^0.4.2"
 
 [tool.poetry.dev-dependencies]
 
