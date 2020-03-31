@@ -1,5 +1,7 @@
+# It's a giant mess but it does the job, my job
 # TODO
 # * Not sure if this is how to Class in Python  ¯\_(ツ)_/¯
+# * Make better use of Depth and Grid classes
 # * Fix bank_index (center) mess!
 # * Make nice n clear repr string
 # * Smoothen slope break direction independent
@@ -42,7 +44,8 @@ class DepthModel(object):
     @staticmethod
     def slopeFunction(slope_radians, length):
         return math.tan(slope_radians) * length        
-        
+    
+    # TODO: Why don't i use the Grid class the generate the meshgrid?
     def makeNewGrid(self):
         """Makes uniform rectilinear grid with numpy meshgrid"""
         print("------ Making new Delft3D grid ------")
@@ -82,7 +85,10 @@ class DepthModel(object):
         print("Writing depth file to:", self.filenames['dep'])
 
         try:
-            Dep.write(new_depth, self.filenames['dep'])
+            Depth.write(new_depth, self.filenames['dep'])
+        except IOError
+            print("\t TypeError: Could not write .dep file!")
+            traceback.print_exc()            
         except TypeError:
             print("\t TypeError: Could not write .dep file!")
             traceback.print_exc()
@@ -122,14 +128,14 @@ class DepthModel(object):
         nodes_x = np.array(x_cross_section[start_smooth_index:end_smooth_index])
         nodes_y = np.array(depth_cross_section[start_smooth_index:end_smooth_index])
         
-#         print(len(nodes_x), len(nodes_y))
+        # print(len(nodes_x), len(nodes_y))
         
-#         fig_q, ax_q = plt.subplots()
-#         fig_q.suptitle('Bathymetry cross-sections (Unsmoothened!)')
-#         ax_q.plot(range(start_smooth_index, end_smooth_index), -nodes_y)
-#         ax_q.set_xlabel('N (grid number)')
-#         ax_q.set_ylabel('Depth [m]')
-#         ax_q.grid()
+        # fig_q, ax_q = plt.subplots()
+        # fig_q.suptitle('Bathymetry cross-sections (Unsmoothened!)')
+        # ax_q.plot(range(start_smooth_index, end_smooth_index), -nodes_y)
+        # ax_q.set_xlabel('N (grid number)')
+        # ax_q.set_ylabel('Depth [m]')
+        # ax_q.grid()
         
         # Feed nodes into bezier instance
         nodes = np.array([nodes_x, nodes_y])
@@ -150,7 +156,6 @@ class DepthModel(object):
     
         return np.array(smooth_cross_section) # smoothened cross section
     
-        return smoothened_channel_part
 
     def generateBathymetrySlopeBreak(self):
         '''

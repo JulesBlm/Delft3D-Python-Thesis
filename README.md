@@ -32,9 +32,9 @@ Furthermore there are some notebooks to
 
 <img src="output_material/depth_sans_enc.png" title="Model Bathymetry z-axis scaled by 25" width="700px" />
 
-<video src="output_material/example_velocity.mp4" title="Velocity animation a at bottom sigma layer" width="280px" />
+<img src="output_material/example_underlayers.png" title="Model Bathymetry z-axis scaled by 25" width="700px" />
 
-<video src="output_material/example_siltconcentration.mp4" width="280px" title="Silt concentration showing boundary reflection" />
+See the folder 'output_material' for more images and videos.
 
 ### Disclaimer
 
