@@ -5,6 +5,7 @@
 # * Fix bank_index (center) mess!
 # * Make nice n clear repr string
 # * Smoothen slope break direction independent
+# * How do I make the pretty (HTML?) interactive reprs like PyVista and xarray? I need on of those
 
 from JulesD3D.dep import Depth
 from JulesD3D.grid import Grid
@@ -84,10 +85,11 @@ class DepthModel(object):
         new_depth.shape = self.bathymetry['depth'].shape
         print("Writing depth file to:", self.filenames['dep'])
 
+        # don't think try's should look like this but ehhh
         try:
             Depth.write(new_depth, self.filenames['dep'])
-        except IOError
-            print("\t TypeError: Could not write .dep file!")
+        except IOError:
+            print("\t IOError: Could not write .dep file!")
             traceback.print_exc()            
         except TypeError:
             print("\t TypeError: Could not write .dep file!")

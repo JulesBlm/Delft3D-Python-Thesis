@@ -14,7 +14,7 @@ def replaceText(filename, new_filename, text_to_find, replacement_text):
 # example: makeMultipleRuns(template_folder='/Users/your_folder_with_runs/Runs/2_5050/Run',\
 #                            restId_base='trim-60km_300m_W60Channel', number_of_runs=5)
 def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, init_MorStt="9.0000000e+000",
-                     new_Tlfsmo=0, removeNetCdf=False):
+                     new_Tlfsmo=0, removeNetCdf=False, Restid_timeindex=None):
     '''
     Takes a 'template_folder' and writes 'number_of_runs' new folders with times and some other parameters adjusted for subsequent restarts.
     
@@ -31,6 +31,7 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
 
     removeNetCdf: Boolean flag to omit NetCDF output keywords in .mdf file; False by default
 
+    Restid_timeindex: Manual value for time index to read from (map) file for restarting
     
     RunTXT keyword is kind of mangled in subsequent MDF files because the OpenEarthTools mdf script joins alls runtxt strings
     '''
@@ -94,7 +95,15 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
     nr_outputsteps = int(init_end_time/output_timestep)
     print(f"Total number of output timesteps is {nr_outputsteps+1}")
     
-    mdf_dict['Restid_timeindex'] = [nr_outputsteps + 1]
+    # Delft3D fails silently when the requested Restid_timeindex is not found in the netCDF
+    # In case of using a reset netCDF this is no problem as there is only one timestep in the dataset
+    if Restid_timeindex:
+        mdf_dict['Restid_timeindex'] = Restid_timeindex
+    else:
+        # nr_outputsteps + 1? I'm still not sure if +1 is necessary, another potential off-by-one bug
+        mdf_dict['Restid_timeindex'] = [nr_outputsteps] 
+        
+        
     mdf_dict['Tlfsmo'] = [float(new_Tlfsmo)]    # Change smoothing time to zero for all subsequent runs
     mdf_dict['FlRst'] = 0                       # Dont write restart files
 

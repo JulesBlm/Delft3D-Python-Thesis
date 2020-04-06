@@ -13,17 +13,20 @@ from os import path
 #     func = lambda x, y: np.sqrt(x ** 2 + y ** 2)
 #     return xr.apply_ufunc(func, a, b)
 
-def fixCORs(nc):
+def fixCORs(dataset):
     '''
     Last column and row of XCOR and YCOR are 0, this fixes that. Nice for plotting
     '''
-    nc.XCOR[-1,:] = nc.XCOR.isel(MC=-2).values + nc.XCOR.isel(MC=1).values
-    nc.XCOR[:,-1] = nc.XCOR.isel(NC=-2).values
-
-    nc.YCOR[:,-1] = nc.YCOR.isel(NC=-2).values  + nc.YCOR.isel(NC=1).values
-    nc.YCOR[-1,:] = nc.YCOR.isel(MC=-2).values
+    dataset.XCOR.load()
+    dataset.YCOR.load()    
     
-    return nc
+    dataset.XCOR[-1,:] = dataset.XCOR.isel(MC=-2).values + dataset.XCOR.isel(MC=1).values
+    dataset.XCOR[:,-1] = dataset.XCOR.isel(NC=-2).values
+
+    dataset.YCOR[:,-1] = dataset.YCOR.isel(NC=-2).values  + dataset.YCOR.isel(NC=1).values
+    dataset.YCOR[-1,:] = dataset.YCOR.isel(MC=-2).values
+    
+    return dataset
 
 def makeMeshGrid(length=45000, width=18000, x_gridstep=300, y_gridstep=300):
 #     print("length:", length)
@@ -44,22 +47,25 @@ def makeMeshGrid(length=45000, width=18000, x_gridstep=300, y_gridstep=300):
     
     return XZ.T, YZ.T # Why transpose again tho?
 
-def fixMeshGrid(nc, XZ, YZ, mystery_flag=False):
+def fixMeshGrid(dataset, mystery_flag=False):
     '''
     Derives gridsteps and dimensions from passed DataSet
     Assumes uniform grid, curved grid wont work!
-    References to XZ and YZ need to be passed explicitly because xarray loads the netCDF lazily
+    References to XZ and YZ need to be passed explicitly because Dask loads the netCDF lazily
     The mystery flag is a Boolean because sometimes 1 and sometimes 2 gridsteps need to be subtracted from the length ¯\_(ツ)_/¯ , don't know why
     '''
     print("------ Fixing mesh grid, assuming a uniform grid ------")
-    x_gridstep = XZ[2][-1] - XZ[1][-1]
-    y_gridstep = YZ[-2][-1] - YZ[-2][-2]
+    dataset.XZ.load()
+    dataset.YZ.load()    
     
-    width = (XZ.shape[0]-2) * x_gridstep
+    x_gridstep = dataset.XZ[2][-1] - dataset.XZ[1][-1]
+    y_gridstep = dataset.YZ[-2][-1] - dataset.YZ[-2][-2]
+    
+    width = (dataset.XZ.shape[0]-2) * x_gridstep
     if mystery_flag:
-        length = (XZ.shape[1] - 1) * y_gridstep # eeehhh hmmmm -1? sometimes -2?
+        length = (dataset.XZ.shape[1] - 1) * y_gridstep # eeehhh hmmmm -1? sometimes -2?
     else: 
-        length = (XZ.shape[1] - 2) * y_gridstep # eeehhh hmmmm -1? sometimes -2?        
+        length = (dataset.XZ.shape[1] - 2) * y_gridstep # eeehhh hmmmm -1? sometimes -2?        
     
     print("x_gridstep:\t", x_gridstep, "m")
     print("y_gridstep:\t", y_gridstep, "m")
@@ -69,20 +75,20 @@ def fixMeshGrid(nc, XZ, YZ, mystery_flag=False):
     XZ, YZ = makeMeshGrid(length=length, width=width, x_gridstep=x_gridstep, y_gridstep=y_gridstep)
 
     # for debugging
-    # print('original XZ', nc.XZ.shape)
-    # print('original YZ', nc.YZ.shape)
+    # print('original XZ', dataset.XZ.shape)
+    # print('original YZ', dataset.YZ.shape)
     # print('new XZ', XZ.shape)
     # print('new YZ', YZ.shape)
-    nc.XZ.values = XZ
-    nc.YZ.values = YZ
+    dataset.XZ.values = XZ
+    dataset.YZ.values = YZ
     
-    return nc
+    return dataset
 
-def addDepth(nc):
+def addDepth(dataset):
     # Could have set LayOut = #Y# in mdf to get LAYER_INTERFACE in map netcdf output file written during simulation and worked with those values
     # But it's a trade-off between file size and processing time  ¯\_(ツ)_/¯
     ##### depth at interfaces #####
-    # nc.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
+    # dataset.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
     #                         height=600, width=400,
     #                         rasterize=True,
     #                         dynamic=True,
@@ -90,24 +96,24 @@ def addDepth(nc):
     #                         legend=True,
     #                         )    
     
-    depth = nc.SIG_INTF @ nc.DPS
+    depth = dataset.SIG_INTF @ dataset.DPS
     
     depth = depth.transpose('time', 'M', 'N', 'SIG_INTF', transpose_coords=True)
     depth = depth.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer interfaces"})
     
-    nc.coords['depth'] = depth
+    dataset.coords['depth'] = depth
     
     # doesnt work since some update of xarray it think
-    # nc = nc.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks since some xarray update, I forgot why it was necessary]
+    # nc = dataset.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks since some xarray update, I forgot why it was necessary]
     
     ##### depth at cell centers #####
-    depth_center = nc.SIG_LYR @ nc.DPS
+    depth_center = dataset.SIG_LYR @ dataset.DPS
     
     depth_center = depth_center.transpose('time', 'M', 'N', 'SIG_LYR', transpose_coords=True)
     depth_center = depth_center.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer centers"})
 
-    nc.coords['depth_center'] = depth_center
-    # nc = nc.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
+    dataset.coords['depth_center'] = depth_center
+    # nc = dataset.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
 
     ##### Add layer thickness DataArray to Data #####
     layer_thickness = np.diff(-depth.values)
@@ -116,14 +122,14 @@ def addDepth(nc):
     
     return nc
 
-def addUnderlayerCoords(nc):
+def addUnderlayerCoords(dataset):
     '''
     Add underlayer coordinates to these data variables, which is nice for interactive plotting with Holoviews/hvPlot
     '''
     
-    nc['MSED'] = nc.MSED.assign_coords(nlyr=nc.nlyr.values)
-    nc['LYRFRAC'] = nc.LYRFRAC.assign_coords(nlyr=nc.nlyr.values)
-    nc['DP_BEDLYR'] = nc.DP_BEDLYR.assign_coords(nlyrp1=nc.nlyrp1.values)
+    nc['MSED'] = dataset.MSED.assign_coords(nlyr=dataset.nlyr.values)
+    nc['LYRFRAC'] = dataset.LYRFRAC.assign_coords(nlyr=dataset.nlyr.values)
+    nc['DP_BEDLYR'] = dataset.DP_BEDLYR.assign_coords(nlyrp1=dataset.nlyrp1.values)
     
     nc['nlyrp1'].attrs = {'standard_name': 'Interfaces of underlayers', 'long_name': 'Number of interfaces of underlayers'}
     nc['nlyr'].attrs = {'standard_name': 'Number of underlayers', 'long_name': 'Number of underlayers'}
@@ -137,19 +143,19 @@ def addVectorSum(nc, U_comp, V_comp, key="summed", attrs={}, dims=('time', 'M', 
     nc[key] = (dims, summed)
     nc[key].attrs = attrs
         
-    nc = nc.drop_vars([U_comp, V_comp])
+    nc = dataset.drop_vars([U_comp, V_comp])
 
     return nc
 
-def makeVelocity(nc): # , U1, V1 directly pass component values
+def makeVelocity(dataset): # , U1, V1 directly pass component values
     # Make Horizontal velocity sum per layer
-    velocity_sum = vector_sum(nc.U1.values, nc.V1.values) # Velocity per layer
+    velocity_sum = vector_sum(dataset.U1.values, dataset.V1.values) # Velocity per layer
     nc['velocity'] = (('time',  'KMAXOUT_RESTR', 'M', 'N',), velocity_sum)
     nc['velocity'].attrs = {'long_name': 'Horizontal velocity per layer', 'units': 'm/s', 'grid': 'grid', 'location': 'edge1'}
     
     # why am i doing this again? For pyvista right?
-    nc['velocity']  = nc.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
-    nc['velocity'] = nc.velocity.assign_coords(depth=(('time', 'M', 'N', 'KMAXOUT_RESTR'), nc['depth_center'].values)) # for pyvista?
+    nc['velocity']  = dataset.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
+    nc['velocity'] = dataset.velocity.assign_coords(depth=(('time', 'M', 'N', 'KMAXOUT_RESTR'), nc['depth_center'].values)) # for pyvista?
     
     return nc
 
@@ -166,7 +172,7 @@ def makeVectorSumsSediments(nc, sediment_dicts=[]):
         raise Exception("The provided list of sediment components is empty. Stopping")
         return
     
-    sediments = [str(sediment.rstrip()) for sediment in nc.NAMCON.isel(time=0).values]
+    sediments = [str(sediment.rstrip()) for sediment in dataset.NAMCON.isel(time=0).values]
 
     for i, sediment in enumerate(sediments):
         print('------', sediment, '------')
@@ -209,16 +215,16 @@ def dropJunk(nc, drop_list=[
     ]):
     
     #### Clean for mr Barker
-    # trim_clean = trim.drop_vars(['ALFAS', 'KCU', 'KCV', 'KCS', 'GSQS', 'PPARTITION', 'KFU', 'KFV', 'TAUKSI', 'DICWW', 'VICWW',
+    # dataset_clean = dataset.drop_vars(['ALFAS', 'KCU', 'KCV', 'KCS', 'GSQS', 'PPARTITION', 'KFU', 'KFV', 'TAUKSI', 'DICWW', 'VICWW',
     #                 'TAUETA', 'TAUMAX', 'UMNLDF', 'VMNLDF', 'SBUUA', 'SBVVA', 'SSUUA', 'SSVVA', 'MORFAC', 'MFTAVG', 'MORAVG', 'TAUETA',
     #                            'R1', 'DG', 'MORFT', 'DM', 'VICUV', 'DPU0', 'DPV0', 'WPHY', 'DMSEDCUM', 'LYRFRAC', 'MSED', 'W', 'WS', 'RICH', 'RTUR1'], errors='ignore')
 
-    #     trim_clean.load().to_netcdf('clean_compressed_sampleD3D.nc', mode='w', engine='netcdf4', format='NETCDF4')     
+    #     dataset_clean.load().to_netcdf('clean_compressed_sampleD3D.nc', mode='w', engine='netcdf4', format='NETCDF4')     
     
     # Remove component DataArrays from DataSet
     print("Dropping a bunch of DataArrays from DataSet...", end='')
     
-    nc = nc.drop_vars(drop_list, errors='ignore')    
+    nc = dataset.drop_vars(drop_list, errors='ignore')    
     print('Done dropping variables.')    
 
     return nc
@@ -249,19 +255,19 @@ def processNetCDF(nc, mystery_flag=True, bottom_stress=True, sum_sediments=True,
     bottom_stres_dims = ('time', 'M', 'N')
     
     # The processing chain
-    nc = fixMeshGrid(nc, nc.XZ.values, nc.YZ.values, mystery_flag=mystery_flag)
+    nc = fixMeshGrid(nc, dataset.XZ.values, dataset.YZ.values, mystery_flag=mystery_flag)
     print("● Fixed mesh grid") # find a way to nicely chain these. just mutate nc for sake of ease?    
-    nc = addDepth(nc) # needs to be done BEFORE makeVelocity!
+    nc = addDepth(dataset) # needs to be done BEFORE makeVelocity!
     print("● Added depth & depth_center to DataSet")    
     nc = addVectorSum(nc, 'TAUKSI', 'TAUETA', key="bottom_stress", attrs=bottom_stress_attrs, dims=bottom_stres_dims) if bottom_stress else print("● Skipping bottom stress")
     nc = makeVectorSumsSediments(nc, sediment_dicts=sediment_vect_component) if sum_sediments else print("● Skippin¡g sediment sums")
-    nc = makeVelocity(nc) if sum_velocities  else print("● Skipping velocity sum") # nc.U1.values, nc.V1.values
+    nc = makeVelocity(dataset) if sum_velocities  else print("● Skipping velocity sum") # dataset.U1.values, dataset.V1.values
     print("● Summed horizontal velocity")
-    nc = addUnderlayerCoords(nc)
+    nc = addUnderlayerCoords(dataset)
     print("● Assigned underlayer coordinates")
-    nc['bottom_diff'] = nc.DPS.isel(time=0) - nc.DPS
+    nc['bottom_diff'] = dataset.DPS.isel(time=0) - dataset.DPS
     print("● Made accumulated deposition/erosion")
-    nc = dropJunk(nc)
+    nc = dropJunk(dataset)
 
     return nc
     
@@ -275,14 +281,14 @@ def writeCleanCDF(ncfilename, chunks=10, mystery_flag=False):
     '''
     
     with xr.open_dataset(ncfilename, chunks={'time': chunks}) as nc:
-        nc = fixMeshGrid(nc, nc.XZ.values, nc.YZ.values, mystery_flag=True)
-        nc = addDepth(nc)
-        nc = makeVelocity(nc)
-#         nc = makeBottomStress(nc)
+        nc = fixMeshGrid(nc, dataset.XZ.values, dataset.YZ.values, mystery_flag=True)
+        nc = addDepth(dataset)
+        nc = makeVelocity(dataset)
+#         nc = makeBottomStress(dataset)
 #         nc = addVectorSum(nc, 'TAUKSI', 'TAUETA', key="bottom_stress", attrs=bottom_stress_attrs, dims=bottom_stres_dims)
         print("Calculated bottom stress sum")
-        nc = addUnderlayerCoords(nc)
-        nc = dropJunk(nc)
+        nc = addUnderlayerCoords(dataset)
+        nc = dropJunk(dataset)
         print("Dropped variables from DataSet")
         
         root, ext = path.splitext(ncfilename)
@@ -290,7 +296,7 @@ def writeCleanCDF(ncfilename, chunks=10, mystery_flag=False):
         
         # TODO overwrite old NetCDF so we don't have to calculate vector sums again U SURE THO?
         print("Start writing netCDF to disk...", end='')
-        nc.load().to_netcdf(new_filename, mode='w', engine='netcdf4', format='NETCDF4') 
+        dataset.load().to_netcdf(new_filename, mode='w', engine='netcdf4', format='NETCDF4') 
         print("Succesfully written new file as ", new_filename)
         
         return new_filename
