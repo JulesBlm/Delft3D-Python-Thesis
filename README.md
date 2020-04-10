@@ -1,17 +1,17 @@
 # Delft3D-FLOW Python Tools for humans
 ### Declarative Delft3D-FLOW file generation and visualisation
 
-Some sane tools for my thesis too ease the pain of having to work with [Delft3D-FLOW](https://oss.deltares.nl/documents/183920/185723/Delft3D-FLOW_User_Manual.pdf)'s insane file formats and to automate the tedious manual labor involved in setting up multiple succesive simulations.
+Some sane tools for my thesis too ease the pain of having to work with Deltares' [Delft3D-FLOW](https://oss.deltares.nl/documents/183920/185723/Delft3D-FLOW_User_Manual.pdf)'s insane file formats and to automate the tedious manual labor involved in setting up multiple succesive simulations.
 
 ## JulesD3D
 
 The folder JulesD3D contains some scripts to
 
 * Write or read grid (`.grd`), depth ( `.dep`), enclosure (`.enc`)
-* Read and write boundary condition (`.bcc`, `.bct`) files.
+* Read and write discharge boundary condition (`.bcc`, `.bct`) records declaratively.
 * Declaratively generate a  DELFT3D-FLOW4 bathymetry model (depth, grid, enclosure) with a smoothened slope break (DepthModel.py)
 * [Prepare subsequent models for restarting from previous simulation](Multirun.md) (multipleruns.py)
-* Process netCDF files for plotting with xarray.hvPlot and PyVista
+* Process netCDF files for plotting with xarray, hvPlot and PyVista
 * [See this on how to visualize Delft3D-Flow netCDF with PyVista](Delft3D_to_PyVista_Approach.md) 
 
 ## Notebooks
