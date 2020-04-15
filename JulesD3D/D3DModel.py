@@ -35,7 +35,7 @@ class D3DModel(object):
 
         df_filenames = []
         
-        extensions = ("enc", "grd", "dep", "bcc", "bct", "sed", "tra", "mdf")
+        extensions = ("enc", "gred", "dep", "bcc", "bct", "sed", "tra", "mdf")
         
         fileproperties = [
             {"type": "Boundary", "ext": "bnd" },
@@ -97,62 +97,72 @@ class D3DModel(object):
         
         self.enc = enc
         
-    def plotMap(self):
-        # TODO: get these from self
-        
-        # x_gridcells, y_gridcells = grid.x.shape
-        x_gridstep = 200
-        y_gridstep = 200
-        
-        x_grid = self.grid.x.data[0]
-        y_grid = self.grid.y.data[:,1]
-        
-        enclosure_x = self.enc.x
-        enclosure_y = self.enc.y
-        
-        plot_enclosure_x_meters = [i * x_gridstep for i in enclosure_x]
-        plot_enclosure_y_meters = [i * y_gridstep for i in enclosure_y]
-        
-        min_depth, max_depth = [np.amin(depth), np.max(depth)]
-        
-        fig_r, ax_r = plt.subplots(nrows=1, figsize=(7, 8))
+    def plotMap(self, depth=True, enclosure=True, grid=True):
+        '''
+        Plot map of depth
+        '''
+                
+        fig, ax = plt.subplots(nrows=1, figsize=(7, 8))
 
-        ax_r.set_title('Map view of model domain', fontsize=16)
-        ax_r.set_aspect('equal')
+        ax.set_title('Map view of model domain', fontsize=16)
+        ax.set_aspect('equal')
         
         # Boundary conditions
-        # ax_r.plot(bc_x_meters[1:][0], bc_y_meters[1:][0], c='coral', linewidth=7.5) #label='Zero discharge BC',
-        # text_zero_discharge = ax_r.text(8000, 35500, "Zero discharge B.C.", fontsize=13)
+        # ax.plot(bc_x_meters[1:][0], bc_y_meters[1:][0], c='coral', linewidth=7.5) #label='Zero discharge BC',
+        # text_zero_discharge = ax.text(8000, 35500, "Zero discharge B.C.", fontsize=13)
         # text_zero_discharge.set_path_effects([PathEffects.withStroke(linewidth=1.5, foreground='w')])
 
-        ax_r.plot(plot_enclosure_x_meters, plot_enclosure_y_meters, c='white', linewidth=2.5, label="Enclosure")
-        grid_im = ax_r.pcolor(self.grid.x, self.grid.y, self.depth.values[0:-1,0:-1], vmin=min_depth, vmax=max_depth, cmap=deep)
-        ax_r.set_xlabel('Width $m$ [m]', fontsize=16)
-        ax_r.set_ylabel('Length $n$ [m]', fontsize=16)
+        if enclosure:
+            # TODO: get gridsteps from self
+            # x_gridcells, y_gridcells = grid.x.shape
+            # a hack that only works for me  ¯\_(ツ)_/¯            
+            x_gridstep = 200
+            y_gridstep = 200
+            
+            enclosure_x = self.enc.x
+            enclosure_y = self.enc.y
+        
+            plot_enclosure_x_meters = [i * x_gridstep for i in enclosure_x]
+            plot_enclosure_y_meters = [i * y_gridstep for i in enclosure_y]
+            ax.plot(plot_enclosure_x_meters, plot_enclosure_y_meters, c='white', linewidth=2.5, label="Enclosure")
+            # legend
+            fig.legend(loc=(0.134,.383), borderpad=0.5)
+
+            
+        if depth:
+            depth = self.depth.values[0:-1,0:-1]
+            min_depth, max_depth = [np.amin(depth), np.max(depth)]
+            grid_im = ax.pcolor(self.grid.x, self.grid.y, self.depth.values[0:-1,0:-1], vmin=min_depth, vmax=max_depth, cmap=deep)
+            
+        if grid:
+            x_grid = self.grid.x.data[0]
+            y_grid = self.grid.y.data[:,1]
+
+            ax.set_xticks(x_grid, minor=True)
+            ax.set_yticks(y_grid, minor=True)
+            
+            
+        ax.set_xlabel('Width $m$ [m]', fontsize=16)
+        ax.set_ylabel('Length $n$ [m]', fontsize=16)
         
         # TODO: Don't hardcode xlim and ylim
-        ax_r.set_xlim(0, 26200)
-        ax_r.set_ylim(0, 36700)
+        ax.set_xlim(0, 26200)
+        ax.set_ylim(0, 36700)
 
-        # grid
-        ax_r.set_xticks(x_grid, minor=True)
-        ax_r.set_yticks(y_grid, minor=True)
 
-        ax_r.grid(which='minor', alpha=0.15)
-        ax_r.grid(which='major', alpha=0.75)
+        ax.grid(which='minor', alpha=0.15)
+        ax.grid(which='major', alpha=0.75)
 
-        # discharge = ax_r.scatter(discharge_location_x - 100, discharge_location_y + 400, s=[175], c='coral', marker="^", edgecolors="white") # label="Discharge BC",
-        # text_discharge = ax_r.text(discharge_location_x - 20, discharge_location_y + 450, "Discharge B.C.", fontsize=13)
+        # discharge = ax.scatter(discharge_location_x - 100, discharge_location_y + 400, s=[175], c='coral', marker="^", edgecolors="white") # label="Discharge BC",
+        # text_discharge = ax.text(discharge_location_x - 20, discharge_location_y + 450, "Discharge B.C.", fontsize=13)
         # text_discharge.set_path_effects([PathEffects.withStroke(linewidth=1.5, foreground='w')])
 
         # colorbar
-        cbar = fig_r.colorbar(grid_im, ax=ax_r)
+        cbar = fig.colorbar(grid_im, ax=ax)
         cbar.ax.set_ylabel("Depth [m]", rotation=-90, va="bottom", fontsize=16)
 
-        # legend 
-        fig_r.legend(loc=(0.134,.383), borderpad=0.5)
         
-        return 
+        return fig, ax, cbar
 
     def plotDepthPyVista(self, screenshot=None):
         if not self.depth or not self.grid:
@@ -173,7 +183,9 @@ class D3DModel(object):
 
         p.show_grid()
         p.set_scale(zscale=25)
-        p.show(screenshot)
+        p.show()
+        
+        return bottom_surface
 
     # def plotVerticalSection(self):
     # hmmm
