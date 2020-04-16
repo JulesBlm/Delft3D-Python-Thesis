@@ -42,6 +42,19 @@ def ncFilepicker(foldername, prefix='', suffix=''):
     
     return select_nc_filename
 
+def folderPicker(foldername, prefix='', suffix=''):
+    subfolders = sorted(glob(f'{foldername}/*/'))
+
+    select_nc_filename = widgets.Select(
+        options=subfolders,
+        description=f'{prefix}Scenario folder{suffix}:',
+        disabled=False,
+        width='90%',
+        layout=widgets.Layout(width='100%', height='120px')
+    )
+    
+    return select_nc_filename
+
 def formatInt(intNr):
     return str(int(intNr))
 

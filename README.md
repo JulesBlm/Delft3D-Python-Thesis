@@ -11,7 +11,7 @@ The folder JulesD3D contains some scripts to
 * Read and write discharge boundary condition (`.bcc`, `.bct`) records declaratively.
 * Declaratively generate a  DELFT3D-FLOW4 bathymetry model (depth, grid, enclosure) with a smoothened slope break (DepthModel.py)
 * [Prepare subsequent models for restarting from previous simulation](Multirun.md) (multipleruns.py)
-* Process netCDF files for plotting with xarray, hvPlot and PyVista
+* Process netCDF files for plotting with xarray, HoloView/hvPlot and PyVista
 * [See this on how to visualize Delft3D-Flow netCDF with PyVista](Delft3D_to_PyVista_Approach.md) 
 
 ## Notebooks
@@ -24,7 +24,9 @@ Furthermore there are some notebooks to
   * [Holoviews](http://holoviews.org/) to write cross-section animations to .mp4 files
   * [PyVista](https://www.pyvista.org) for 3D plotting both hydrodynamic and underlayer properties
   * ~~Matplotlib plus some widgets to quickly make some plots~~ [abandoned]
-  
+* Manually change values in a netCDF outputfile and write it to disk\
+  * Reset hydrodynamic properties
+  * Reset transport layer
 
 ##  Demo images
 
@@ -54,7 +56,7 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
 2. Notebook showing overview of MDF file
 2. Use Panel for better & cleaner widgets, both for hvPlot and for PyVista
 3. Properly structure JulesD3D folder as package
-4. Use ufuncs to increase performance
+4. Use ufuncs to increase performance in process 
 5. Move notebooks to separate folders
 6. ~~Plot according to grid. Delft3D uses a staggered grid and an equidistant sigma ocean grid for depth.~~ 
    - ~~Plot vertical cross-section on true bathymetry ie scale sigma layers to their thickness~~
