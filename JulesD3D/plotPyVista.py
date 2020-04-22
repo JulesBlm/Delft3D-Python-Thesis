@@ -1,18 +1,9 @@
 # todo: DRY makeStructuredGridInterfaces and makeStructuredGridInterface, merge into one function
 import pyvista as pv
 import xarray as xr
-from pandas import to_datetime
 import datetime
 import numpy as np
 from JulesD3D.processNetCDF import addDepth, fixCORs, fixMeshGrid
-
-# TODO: Day is WRONG!
-def easyTimeFormat(datetimestring):
-    '''Formats np.datetime64 to nice string with Day hours minutes seconds'''
-    t = to_datetime(str(datetimestring)) 
-    timestring = t.strftime("Day %d — %H:%M:%S") #%D
-    print(datetimestring)
-    return timestring
 
 # TODO Make parent MakeBottom surface function/class and inherit from that
 def makeBottomSurface(dataset, timestep=-1, mystery_flag=False):

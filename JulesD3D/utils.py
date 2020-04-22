@@ -1,6 +1,7 @@
 # Just some helpful functions
 import numpy as np
 import pandas as pd
+from pandas import to_datetime
 import xarray as xr
 import numpy.ma as ma
 import matplotlib.pyplot as plt
@@ -14,7 +15,7 @@ from glob import glob
 from os import path
 import ipywidgets as widgets
 
-def multiNcFilepicker(foldername, ):
+def multiNcFilePicker(foldername, ):
     nc_files = sorted(glob(foldername + '/*.nc'))
 
     select_nc_filenames = widgets.SelectMultiple(
@@ -29,7 +30,7 @@ def multiNcFilepicker(foldername, ):
     return select_nc_filenames
   
 
-def ncFilepicker(foldername, prefix='', suffix=''):
+def ncFilePicker(foldername, prefix='', suffix=''):
     nc_files = sorted(glob(foldername + '/*.nc'))
 
     select_nc_filename = widgets.Select(
@@ -54,6 +55,14 @@ def folderPicker(foldername, prefix='', suffix=''):
     )
     
     return select_nc_filename
+
+# TODO: Day is WRONG!
+def easyTimeFormat(datetimestring):
+    '''Formats np.datetime64 to nice string with Day hours minutes seconds'''
+    t = to_datetime(str(datetimestring)) 
+    timestring = t.strftime("Day %d — %H:%M:%S") #%D
+    print(datetimestring)
+    return timestring
 
 def formatInt(intNr):
     return str(int(intNr))
