@@ -1,3 +1,4 @@
+# A bunch of hacky functions to prepare Delft3D-FLOW output for plotting and
 # TODO: READ ABOUT OOP
 # turn this into a class
 # turn seperate fudatasettions into classes?
@@ -85,21 +86,23 @@ def fixMeshGrid(dataset, mystery_flag=False):
     return dataset
 
 def addDepth(dataset):
-    # Could have set LayOut = #Y# in mdf to get LAYER_INTERFACE in map netcdf output file written during simulation and worked with those values
+    # Set LayOut = #Y# in mdf to get LAYER_INTERFACE in map netcdf output file written during simulation 
     # But it's a trade-off between file size and processing time  ¯\_(ツ)_/¯
-    ##### depth at interfaces #####
-    # dataset.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
-    #                         height=600, width=400,
-    #                         rasterize=True,
-    #                         dynamic=True,
-    #                         grid=False,
-    #                         legend=True,
-    #                         )    
+    if 'LAYER_INTERFACE' in dataset: # depth at interfaces
+        depth = dataset.LAYER_INTERFACE 
+        
+        # dataset.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
+        #                     height=600, width=400,
+        #                     rasterize=True,
+        #                     dynamic=True,
+        #                     grid=False,
+        #                     legend=True,
+        #                     )    
+    else:
+        depth = dataset.SIG_INTF @ dataset.DPS
     
-    depth = dataset.SIG_INTF @ dataset.DPS
-    
-    depth = depth.transpose('time', 'M', 'N', 'SIG_INTF', transpose_coords=True)
-    depth = depth.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer interfaces"})
+        depth = depth.transpose('time', 'M', 'N', 'SIG_INTF', transpose_coords=True)
+        depth = depth.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer interfaces"})
     
     dataset.coords['depth'] = depth
     
@@ -115,6 +118,8 @@ def addDepth(dataset):
     dataset.coords['depth_center'] = depth_center
     # dataset = dataset.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
 
+#     trim.set_coords('depth_center')
+    
     ##### Add layer thickness DataArray to Data #####
     layer_thickness = np.diff(-depth.values)
     dataset['layer_thickness'] = (depth_center.dims, layer_thickness)
@@ -266,35 +271,36 @@ def processNetCDF(dataset, mystery_flag=True, bottom_stress=True, sum_sediments=
     dataset = addUnderlayerCoords(dataset)
     print("● Assigned underlayer coordinates")
     dataset['bottom_diff'] = dataset.DPS.isel(time=0) - dataset.DPS
-    print("● Made accumulated deposition/erosion")
+    print("● Made cumulative deposition/erosion")
     dataset = dropJunk(dataset)
 
     return dataset
     
 # add flags for what vector sums to write
 # dict for each vector sum? [{'dims': , 'attrs': , 'key': '', }
-def writeCleadatasetDF(datasetfilename, chunks=10, mystery_flag=False):
+def writeCleanDataset(dataset_filename, chunks=10, mystery_flag=False):
     '''
     Add vector sum for velocities and sediment transport DataArrays to DataSet
     Remove useless stuff and save new netCDF to disk
-    TODO: Whats a good chunk number?
+    TODO: Whats a good chunk number? Can determining chunk size be automated?
     '''
     
-    with xr.open_dataset(datasetfilename, chunks={'time': chunks}) as dataset:
-        dataset = fixMeshGrid(dataset, dataset.XZ.values, dataset.YZ.values, mystery_flag=True)
-        dataset = addDepth(dataset)
-        dataset = makeVelocity(dataset)
-#         dataset = makeBottomStress(dataset)
-#         dataset = addVectorSum(dataset, 'TAUKSI', 'TAUETA', key="bottom_stress", attrs=bottom_stress_attrs, dims=bottom_stres_dims)
-        print("Calculated bottom stress sum")
-        dataset = addUnderlayerCoords(dataset)
-        dataset = dropJunk(dataset)
-        print("Dropped variables from DataSet")
+    with xr.open_dataset(dataset_filename, chunks={'time': chunks}) as dataset:
+        clean_dataset = processNetCDF(dataset)
         
-        root, ext = path.splitext(datasetfilename)
+#         dataset = fixMeshGrid(dataset, dataset.XZ.values, dataset.YZ.values, mystery_flag=True)
+#         dataset = addDepth(dataset)
+#         dataset = makeVelocity(dataset)
+# #         dataset = makeBottomStress(dataset)
+# #         dataset = addVectorSum(dataset, 'TAUKSI', 'TAUETA', key="bottom_stress", attrs=bottom_stress_attrs, dims=bottom_stres_dims)
+#         print("Calculated bottom stress sum")
+#         dataset = addUnderlayerCoords(dataset)
+#         dataset = dropJunk(dataset)
+#         print("Dropped variables from DataSet")
+        
+        root, ext = path.splitext(dataset_filename)
         new_filename = root + '_clean' + ext
         
-        # TODO overwrite old NetCDF so we don't have to calculate vector sums again U SURE THO?
         print("Start writing netCDF to disk...", end='')
         dataset.load().to_netcdf(new_filename, mode='w', engine='netcdf4', format='NETCDF4') 
         print("Succesfully written new file as ", new_filename)

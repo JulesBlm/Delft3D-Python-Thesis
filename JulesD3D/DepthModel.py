@@ -229,8 +229,8 @@ class DepthModel(object):
         depth_matrix_with_channel = depth_matrix_with_slopes.copy()
         
         # Add channel slope to depth grid
-        channel_grid_cells = int(self.channel['width']/self.grid['x_gridstep']) + 1#2
-        print("channel_grid_cells", channel_grid_cells)
+        channel_grid_cells = int(self.channel['width']/self.grid['x_gridstep'])
+        print("* channel_grid_cells", channel_grid_cells)
         bank_width = (self.grid['width'] - self.channel['width'])/2
         print('* bank_width', bank_width)
         bank_index = int((bank_width/self.grid['x_gridstep']))
@@ -248,8 +248,8 @@ class DepthModel(object):
         depth_matrix_with_channel[:,-1] = np.nan # set last row to nan
         depth_matrix_with_channel[-1] = np.nan # set last column to nan
 
-        print("bank_left", bank_left)
-        print("bank_right", bank_right)
+        # print("* bank_left", bank_left)
+        # print("* bank_right", bank_right)
         print('\ndepth_matrix[bank_left:bank_right,:] shape', depth_matrix_with_channel[bank_left:bank_right,:].shape)
         print('channel', channel.shape)
         depth_matrix_with_channel[bank_left:bank_right,:] = channel
@@ -282,6 +282,10 @@ class DepthModel(object):
         self.writeDepFile()
     
     def plotCrossSection(self):
+        channel_length_index = int((self.channel['length'])/self.grid['y_gridstep']) + 1
+
+        left = channel_length_index - 10
+        right = channel_length_index + 10
         
         y_section = self.grid['y_grid'][:,0] 
         cross_section = self.bathymetry['depth'][:,1]
@@ -298,12 +302,8 @@ class DepthModel(object):
         ax1.tick_params(labelrotation=45)
         ax1.grid()
         
-#         ax2.plot(y_section[40:60], -cross_section[40:60],
-#                  y_section[40:60], -cross_section_channel[40:60]  )
-#         ax2.plot(y_section[48:54], -cross_section[48:54],
-#                  y_section[48:54], -cross_section_channel[48:54]  )
-        ax2.plot(range(40,60), -cross_section[40:60],
-                 range(40,60), -cross_section_channel[40:60] )    
+        ax2.plot(range(left, right), -cross_section[left, right],
+                 range(left, right), -cross_section_channel[left, right] )    
     
         ax2.legend(['Normal', 'Channel'], loc='best')
 
@@ -312,8 +312,8 @@ class DepthModel(object):
         
 #         ax3.plot(y_section[51:71], -cross_section[51:71],
 #                  y_section[51:71], -cross_section_channel[51:71])
-        ax3.plot(range(51,71), -cross_section[51:71],
-                 range(51,71), -cross_section_channel[51:71])
+        ax3.plot(range(channel_length_index,None), -cross_section[channel_length_index:None],
+                 range(channel_length_index,None), -cross_section_channel[channel_length_index:None])
 
         ax3.legend(['Normal', 'Channel'], loc='best')
 
