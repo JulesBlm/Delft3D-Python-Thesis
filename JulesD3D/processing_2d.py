@@ -1,15 +1,22 @@
 '''
-From https://github.com/NOAA-ORR-ERD/gridded
+From Gridded: https://github.com/NOAA-ORR-ERD/gridded
 
 Created on Apr 2, 2015
 
 @author: ayan
+
+TODO
+* Use (xarray) ufuncs to speed up action
 '''
 
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 import numpy.ma as ma
+
+# def vector_sum(a, b):
+#     fudataset = lambda x, y: np.sqrt(x ** 2 + y ** 2)
+#     return xr.apply_ufudataset(fudataset, a, b)
 
 
 def vector_sum(x_arr, y_arr):
@@ -27,6 +34,12 @@ def vector_sum(x_arr, y_arr):
     """
     return ma.sqrt(x_arr**2 + y_arr**2)
 
+def vector_angle(x_arr, y_arr, angle_arr, mag_arr):
+    # Convert U, V to magnitude and angle
+    mag = np.sqrt(U**2 + V**2)
+    angle = (np.pi/2.) - np.arctan2(U/mag, V/mag)
+
+    return angle
 
 def rotate_vectors(x_arr, y_arr, angle_arr):
     """

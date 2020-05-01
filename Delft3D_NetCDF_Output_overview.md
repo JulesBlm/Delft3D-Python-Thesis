@@ -14,8 +14,8 @@
 | Keyword | Description |Dimensions|
 |-----------|-------------|-------------|
 | RHO   | Density per layer in sigma point | (time, KMAXOUT_RESTR, M, N) |
-| WPHY  | W-velocity per layer in sigma point | (time, KMAXOUT_RESTR, M, N) |
-| W   | W-omega per layer in sigma point ANGLE | (time, KMAXOUT, M, N) |
+| WPHY  | W-velocity per layer in sigma point : sediment fall velocity? (m/s) | (time, KMAXOUT_RESTR, M, N) |
+| W   | W-omega per layer in sigma point : wave angle? | (time, KMAXOUT, M, N) |
 | R1  | Concentrations per layer in sigma point | (time, LSTSCI, KMAXOUT_RESTR, M, N) |
 | WS  | Settling velocity per sigma-layer | (time, LSED, KMAXOUT, M, N) |
 

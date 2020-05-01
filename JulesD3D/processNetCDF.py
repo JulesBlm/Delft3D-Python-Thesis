@@ -10,10 +10,6 @@ import xarray as xr
 import numpy as np
 from os import path
 
-# def magnitude(a, b):
-#     fudataset = lambda x, y: np.sqrt(x ** 2 + y ** 2)
-#     return xr.apply_ufudataset(fudataset, a, b)
-
 def fixCORs(dataset):
     '''
     Last column and row of XCOR and YCOR are 0, this fixes that. Nice for plotting
@@ -86,18 +82,16 @@ def fixMeshGrid(dataset, mystery_flag=False):
     return dataset
 
 def addDepth(dataset):
+    '''
+    Add true depth coords to dataset for plotting
+    TODO: Test if LAYER_INTERFACE values are in dataset
+    '''
+    
     # Set LayOut = #Y# in mdf to get LAYER_INTERFACE in map netcdf output file written during simulation 
     # But it's a trade-off between file size and processing time  ¯\_(ツ)_/¯
     if 'LAYER_INTERFACE' in dataset: # depth at interfaces
         depth = dataset.LAYER_INTERFACE 
         
-        # dataset.LAYER_INTERFACE.isel(time=-1, SIG_INTF=-1).hvplot.quadmesh('XZ', 'YZ',
-        #                     height=600, width=400,
-        #                     rasterize=True,
-        #                     dynamic=True,
-        #                     grid=False,
-        #                     legend=True,
-        #                     )    
     else:
         depth = dataset.SIG_INTF @ dataset.DPS
     
@@ -107,7 +101,7 @@ def addDepth(dataset):
     dataset.coords['depth'] = depth
     
     # doesnt work since some update of xarray it think
-    # dataset = dataset.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks sidatasete some xarray update, I forgot why it was necessary]
+    # dataset = dataset.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks since some xarray update, I forgot why it was necessary]
     
     ##### depth at cell centers #####
     depth_center = dataset.SIG_LYR @ dataset.DPS
@@ -118,7 +112,7 @@ def addDepth(dataset):
     dataset.coords['depth_center'] = depth_center
     # dataset = dataset.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
 
-#     trim.set_coords('depth_center')
+    # trim.set_coords('depth_center')
     
     ##### Add layer thickness DataArray to Data #####
     layer_thickness = np.diff(-depth.values)
@@ -152,23 +146,30 @@ def addVectorSum(dataset, U_comp, V_comp, key="summed", attrs={}, dims=('time', 
 
     return dataset
 
-def makeVelocity(dataset): # , U1, V1 directly pass component values
+def makeVelocity(dataset, transpose=True, angle=False): # , U1, V1 directly pass component values
+    if not 'depth_center' in dataset:
+        dataset = addDepth(dataset)
+    
     # Make Horizontal velocity sum per layer
     velocity_sum = vector_sum(dataset.U1.values, dataset.V1.values) # Velocity per layer
-    dataset['velocity'] = (('time',  'KMAXOUT_RESTR', 'M', 'N',), velocity_sum)
+    dataset['velocity'] = (('time', 'KMAXOUT_RESTR', 'M', 'N'), velocity_sum) # xr.DataArray
     dataset['velocity'].attrs = {'long_name': 'Horizontal velocity per layer', 'units': 'm/s', 'grid': 'grid', 'location': 'edge1'}
     
-    # why am i doing this again? For pyvista right?
-    dataset['velocity']  = dataset.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
-    dataset['velocity'] = dataset.velocity.assign_coords(depth=(('time', 'M', 'N', 'KMAXOUT_RESTR'), dataset['depth_center'].values)) # for pyvista?
-    
+    # So it matches depth_center order of coords and add depth_center as coords
+    if transpose:
+        dataset['velocity'] = dataset.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
+        dataset['velocity'] = dataset.velocity.assign_coords(depth_center=(('time', 'M', 'N', 'KMAXOUT_RESTR'), dataset['depth_center'].values))
+        
+#     if angle:
+        # TODO
+        
     return dataset
 
 def makeVectorSumsSediments(dataset, sediment_dicts=[]):
     '''
     Loops of all constituents (sediments) found in DataSet and sums their vector components and add them to DataSet,
     sediment_dicts is a list of dicts; each dict should have these keys
-        'U_V_keys': ['U', 'V'],
+        'U_V_keys': ['U1', 'V1'],
         'attrs': {'long_name': 'Some long name', 'units': 'm', 'grid': 'grid', 'location': 'edge1'},
         'dims': ('time', 'M', 'N'),
         'new_key': 'susp_load', 
