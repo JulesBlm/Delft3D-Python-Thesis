@@ -146,9 +146,9 @@ def addVectorSum(dataset, U_comp, V_comp, key="summed", attrs={}, dims=('time', 
 
     return dataset
 
-def makeVelocity(dataset, transpose=True, angle=False): # , U1, V1 directly pass component values
-    if not 'depth_center' in dataset:
-        dataset = addDepth(dataset)
+# velocity is special thats why it gets its own function
+# TODO add velocity angle here too
+def makeVelocity(dataset, transpose=True, angle=False):
     
     # Make Horizontal velocity sum per layer
     velocity_sum = vector_sum(dataset.U1.values, dataset.V1.values) # Velocity per layer
@@ -157,6 +157,10 @@ def makeVelocity(dataset, transpose=True, angle=False): # , U1, V1 directly pass
     
     # So it matches depth_center order of coords and add depth_center as coords
     if transpose:
+        if not 'depth_center' in dataset:
+            print("makeVelocity: depth not in DataSet already, adding it now...")
+            dataset = addDepth(dataset)
+        
         dataset['velocity'] = dataset.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
         dataset['velocity'] = dataset.velocity.assign_coords(depth_center=(('time', 'M', 'N', 'KMAXOUT_RESTR'), dataset['depth_center'].values))
         
@@ -308,3 +312,72 @@ def writeCleanDataset(dataset_filename, chunks=10, mystery_flag=False):
         
         return new_filename
 
+
+# Why is this a seperate function and not in addDepth by default again?
+# Could't I add depth coords to every data_var there? 
+# Things blew up when there are many multi-dimensional coords I think? eg depth, depth_center, N_KMAXOUT_RESTR, M_KMAXOUT_RESTR, N_KMAXOUT, M_KMAXOUT
+# Think holoviews gets confused about which coords to take when there are 6 different multi-dim options
+def makeVerticalSlice(dataset, keyword, along_length=True):
+    '''
+    Returns DataArray that has extra coords meshgrid for convenient vertical plotting
+    By default along length, set to along_length=False to get section along width
+    TODO: proper time-dependant vertical meshgrid
+    '''
+    if keyword not in dataset:
+        raise Exception(f"Can't find {keyword} in DataSet")
+    if not 'depth_center' in dataset or not 'depth' in dataset:
+        print("Adding depths to DataSet...")
+        dataset = addDepth(dataset)
+        
+    # check if this DataArray is really at centers
+    if 'KMAXOUT_RESTR' in dataset[keyword].dims:
+        # add depth center coords
+        vertical_slice = dataset[keyword].assign_coords(depth_center=(
+            ('time', 'M', 'N', 'KMAXOUT_RESTR'), dataset.depth_center.values)
+        )
+
+        if along_length:
+            # make a mesh grid along length
+            mesh_N_lyr, _ = xr.broadcast(dataset.YZ[0], dataset.SIG_LYR)
+
+            N_KMAXOUT_RESTR = xr.DataArray(mesh_N_lyr, dims=['N', 'KMAXOUT_RESTR'], 
+                                    coords={'N': dataset.N, 'KMAXOUT_RESTR': dataset.KMAXOUT_RESTR},
+                                    attrs={'units':'m', 'long_name': 'Y-SIG_LYR Meshgrid'})
+
+            vertical_slice.coords["N_KMAXOUT_RESTR"] = N_KMAXOUT_RESTR   
+        else: 
+            mesh_M_lyr, _ = xr.broadcast(dataset.XZ[0], dataset.SIG_LYR)
+
+            M_KMAXOUT_RESTR = xr.DataArray(mesh_N_lyr, dims=['M', 'KMAXOUT_RESTR'], 
+                                        coords={'M': dataset.M, 'KMAXOUT_RESTR': dataset.KMAXOUT_RESTR},
+                                        attrs={'units':'m', 'long_name': 'X-SIG_LYR Meshgrid'})
+
+            vertical_slice.coords["M_KMAXOUT_RESTR"] = M_KMAXOUT_RESTR   
+
+    elif 'KMAXOUT' in dataset[keyword].dims:
+        # add depth center coords
+        vertical_slice = dataset[keyword].assign_coords(depth=(
+            ('time', 'M', 'N', 'KMAXOUT'), dataset.depth.values)
+        )
+
+        if along_length:
+            mesh_N_intf, _ = xr.broadcast(trim.YZ[0], trim.SIG_INTF)
+
+            N_KMAXOUT = xr.DataArray(mesh_N_intf, dims=['N', 'KMAXOUT'], 
+                                    coords={'N': dataset.N, 'KMAXOUT': dataset.KMAXOUT},
+                                    attrs={'units':'m', 'long_name': 'Y-SIG_INTF Meshgrid'})
+
+            vertical_slice.coords["N_KMAXOUT"] = N_KMAXOUT
+        else:
+            mesh_M_lyr, _ = xr.broadcast(dataset.XZ[0], dataset.SIG_INTF)
+
+            M_KMAXOUT = xr.DataArray(mesh_N_lyr, dims=['M', 'KMAXOUT'], 
+                                        coords={'M': dataset.M, 'KMAXOUT': dataset.KMAXOUT},
+                                        attrs={'units':'m', 'long_name': 'X-SIG_INTF Meshgrid'})
+
+            vertical_slice.coords["M_KMAXOUT"] = M_KMAXOUT
+            
+    else:
+        raise Exception('This DataArray does not have the right dimensions (KMAXOUT or KMAXOUT_RESTR)')
+    
+    return vertical_slice
