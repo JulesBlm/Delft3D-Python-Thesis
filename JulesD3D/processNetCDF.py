@@ -9,6 +9,19 @@ from JulesD3D.processing_2d import vector_sum
 import xarray as xr
 import numpy as np
 from os import path
+from IPython.display import Markdown as md 
+
+# def renameConstituents
+# # attempt to rename constituents dict to sediment names but doesnt work yet
+# sediments = [sed.decode('UTF-8').strip() for sed in trim.NAMCON.values]
+# # # just for loop on size of seds
+# aye_dict = {
+#     0: sediments[0],
+#     1: sediments[1]
+# }
+# trim['LSTSCI'] = sediments
+# ayye = trim.rename_dims({'LSTSCI': 'sed'})
+# ayye.sed
 
 def fixCORs(dataset):
     '''
@@ -26,6 +39,13 @@ def fixCORs(dataset):
     return dataset
 
 def makeMeshGrid(length=45000, width=18000, x_gridstep=300, y_gridstep=300):
+    '''
+    Make a uniform meshgrid using given parameters
+    TODO
+    * Non-uniform meshgrid
+    * These default arguments only make sense for my current model
+    '''
+    
     # print("length:", length)
     # print("width:", width)
     # print("x_gridstep:", x_gridstep)
@@ -47,11 +67,11 @@ def makeMeshGrid(length=45000, width=18000, x_gridstep=300, y_gridstep=300):
 def fixMeshGrid(dataset, mystery_flag=False):
     '''
     Derives gridsteps and dimensions from passed DataSet
-    Assumes uniform grid, curved grid wont work!
+    Assumes uniform grid, curvilinear grid wont work!
     Reference to XZ and YZ need to be passed explicitly because Dask loads the netCDF lazily
-    The mystery flag is a Boolean because sometimes 1 and sometimes 2 gridsteps need to be subtracted from the length ¯\_(ツ)_/¯ , don't know why
+    The mystery flag is a Boolean because sometimes 1 and sometimes 2 gridsteps need to be subtracted from the length ¯\_(ツ)_/¯ , don't really know why (even vs uneven?)
     '''
-    print("------ Fixing mesh grid, assuming a uniform grid ------")
+    print("● Fixing mesh grid, assuming a uniform grid ")
     dataset.XZ.load()
     dataset.YZ.load()    
     
@@ -64,10 +84,16 @@ def fixMeshGrid(dataset, mystery_flag=False):
     else: 
         length = (dataset.XZ.shape[1] - 2) * y_gridstep # eeehhh hmmmm -1? sometimes -2?        
     
-    print("x_gridstep:\t", x_gridstep, "m")
-    print("y_gridstep:\t", y_gridstep, "m")
-    print("width:\t\t", width, "m")
-    print("length:\t\t", length, "m")
+    md(f"""
+    # Times
+    | Name | Value |
+    | --- | --- |
+    | x gridstep | {x_gridstep} |
+    | y gridstep | {y_gridstep} |
+    | Width | {width} |
+    | Length | {length} |
+    
+    """)    
     
     XZ, YZ = makeMeshGrid(length=length, width=width, x_gridstep=x_gridstep, y_gridstep=y_gridstep)
 
