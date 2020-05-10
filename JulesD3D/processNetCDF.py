@@ -13,6 +13,7 @@ from IPython.display import Markdown as md
 
 # def renameConstituents
 # # attempt to rename constituents dict to sediment names but doesnt work yet
+## Also for turbulent quantities!
 # sediments = [sed.decode('UTF-8').strip() for sed in trim.NAMCON.values]
 # # # just for loop on size of seds
 # aye_dict = {
@@ -42,7 +43,7 @@ def makeMeshGrid(length=45000, width=18000, x_gridstep=300, y_gridstep=300):
     '''
     Make a uniform meshgrid using given parameters
     TODO
-    * Non-uniform meshgrid
+    * Non-uniform meshgrids?
     * These default arguments only make sense for my current model
     '''
     
@@ -110,7 +111,7 @@ def fixMeshGrid(dataset, mystery_flag=False):
 def addDepth(dataset):
     '''
     Add true depth coords to dataset for plotting
-    TODO: Test if LAYER_INTERFACE values are in dataset
+    TODO: Test if LAYER_INTERFACE works
     '''
     
     # Set LayOut = #Y# in mdf to get LAYER_INTERFACE in map netcdf output file written during simulation 
@@ -126,8 +127,8 @@ def addDepth(dataset):
     
     dataset.coords['depth'] = depth
     
-    # doesnt work since some update of xarray it think
-    # dataset = dataset.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT [breaks since some xarray update, I forgot why it was necessary]
+    # [breaks since some xarray update, I forgot why it was necessary]
+    # dataset = dataset.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT 
     
     ##### depth at cell centers #####
     depth_center = dataset.SIG_LYR @ dataset.DPS
@@ -138,7 +139,7 @@ def addDepth(dataset):
     dataset.coords['depth_center'] = depth_center
     # dataset = dataset.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
 
-    # trim.set_coords('depth_center')
+    # dataset.set_coords('depth_center')
     
     ##### Add layer thickness DataArray to Data #####
     layer_thickness = np.diff(-depth.values)
@@ -182,6 +183,7 @@ def makeVelocity(dataset, transpose=True, angle=False):
     dataset['velocity'].attrs = {'long_name': 'Horizontal velocity per layer', 'units': 'm/s', 'grid': 'grid', 'location': 'edge1'}
     
     # So it matches depth_center order of coords and add depth_center as coords
+    # Saves time and processing power too if depth_center isn't already in dataset
     if transpose:
         if not 'depth_center' in dataset:
             print("makeVelocity: depth not in DataSet already, adding it now...")
@@ -343,7 +345,8 @@ def writeCleanDataset(dataset_filename, chunks=10, mystery_flag=False):
 # Could't I add depth coords to every data_var there? 
 # Things blew up when there are many multi-dimensional coords I think? eg depth, depth_center, N_KMAXOUT_RESTR, M_KMAXOUT_RESTR, N_KMAXOUT, M_KMAXOUT
 # Think holoviews gets confused about which coords to take when there are 6 different multi-dim options
-def makeVerticalSlice(dataset, keyword, along_length=True):
+# How to add multiple kwargs that do the kidna the same thing?
+def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False):
     '''
     Returns DataArray that has extra coords meshgrid for convenient vertical plotting
     By default along length, set to along_length=False to get section along width
@@ -354,6 +357,8 @@ def makeVerticalSlice(dataset, keyword, along_length=True):
     if not 'depth_center' in dataset or not 'depth' in dataset:
         print("Adding depths to DataSet...")
         dataset = addDepth(dataset)
+    if along_width: # kinda ugly solution
+        along_length = False
         
     # check if this DataArray is really at centers
     if 'KMAXOUT_RESTR' in dataset[keyword].dims:
@@ -372,9 +377,9 @@ def makeVerticalSlice(dataset, keyword, along_length=True):
 
             vertical_slice.coords["N_KMAXOUT_RESTR"] = N_KMAXOUT_RESTR   
         else: 
-            mesh_M_lyr, _ = xr.broadcast(dataset.XZ[0], dataset.SIG_LYR)
+            mesh_M_lyr, _ = xr.broadcast(dataset.XZ[:,0], dataset.SIG_LYR)
 
-            M_KMAXOUT_RESTR = xr.DataArray(mesh_N_lyr, dims=['M', 'KMAXOUT_RESTR'], 
+            M_KMAXOUT_RESTR = xr.DataArray(mesh_M_lyr, dims=['M', 'KMAXOUT_RESTR'], 
                                         coords={'M': dataset.M, 'KMAXOUT_RESTR': dataset.KMAXOUT_RESTR},
                                         attrs={'units':'m', 'long_name': 'X-SIG_LYR Meshgrid'})
 
@@ -387,7 +392,7 @@ def makeVerticalSlice(dataset, keyword, along_length=True):
         )
 
         if along_length:
-            mesh_N_intf, _ = xr.broadcast(trim.YZ[0], trim.SIG_INTF)
+            mesh_N_intf, _ = xr.broadcast(dataset.YZ[0], dataset.SIG_INTF)
 
             N_KMAXOUT = xr.DataArray(mesh_N_intf, dims=['N', 'KMAXOUT'], 
                                     coords={'N': dataset.N, 'KMAXOUT': dataset.KMAXOUT},
@@ -395,7 +400,7 @@ def makeVerticalSlice(dataset, keyword, along_length=True):
 
             vertical_slice.coords["N_KMAXOUT"] = N_KMAXOUT
         else:
-            mesh_M_lyr, _ = xr.broadcast(dataset.XZ[0], dataset.SIG_INTF)
+            mesh_M_lyr, _ = xr.broadcast(dataset.XZ[:,0], dataset.SIG_INTF)
 
             M_KMAXOUT = xr.DataArray(mesh_N_lyr, dims=['M', 'KMAXOUT'], 
                                         coords={'M': dataset.M, 'KMAXOUT': dataset.KMAXOUT},

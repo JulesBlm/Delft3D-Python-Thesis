@@ -20,7 +20,7 @@ def multiNcFilePicker(foldername, ):
 
     select_nc_filenames = widgets.SelectMultiple(
         options=nc_files,
-        rows=10,
+        rows=30,
         description='NetCDF files',
         disabled=False,
         width='100%',

@@ -13,6 +13,7 @@ import pyvista as pv
 
 colormap = deep
 
+# i really should read up on object oriented in Python
 class D3DModel(object):
     """
     Read a folder containing Delft3D4-FLOW files
