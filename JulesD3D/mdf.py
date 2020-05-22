@@ -1,10 +1,10 @@
 """
 Read/write Delft3D-FLOW *.mdf input files to/from dictionary
-Todo: Split Runtxt appropriately
+Todo:
+* Split Runtxt correctly
+* Use a pandas DataFrame instead of dict
 """
 from JulesD3D.utils import formatSci
-
-__version__ = "$Revision: 7870 $"
 
 #  Copyright notice
 #   --------------------------------------------------------------------
@@ -41,24 +41,30 @@ __version__ = "$Revision: 7870 $"
 # $Keywords: $
 
 
-def _RHS2val_(line):
+def _RHS2val_(line, verbose=False):
     """parse 1(!) RHS line value from *.mdf file to a str, '' or float"""
-    # print("_RHS2val_:", line)
+    
+    if verbose: print("_RHS2val_:", line)
+    
     if "#" in line:
-        dummy, value, dummy = line.split("#", 2)
+        # its a string!
+        _, value, _ = line.split("#", 2)
     elif "[" in line:
         value = ""
     else:
         value = line.strip()
         split_value = value.split()
-        # print("split value", split_value)
+        
+        if verbose: print("split value", split_value)
         value = [float(value) for value in split_value]
 
         # print(value)
 
+        
     return value
 
-def read(mdf_file):
+def read(mdf_file, verbose=False):
+    # doesnt read columnwise keywords correctly
     """Read Delft3D-Flow *.mdf file into dictionary.
       >> inp, inp_order = mdf.read('a.mdf')
    Note that all comment lines and keyword formatting are not preserved.
@@ -74,12 +80,29 @@ def read(mdf_file):
 
     f = open(mdf_file, "r")
 
+    columnwise_list = [
+        "Thick",
+        "Rettis",
+        "Rettib",
+        "u0",
+        "v0",
+        "s0",
+        "t0",
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+    ]
+    
     for line in f.readlines():
         # print("------------------------- NEW LINE ----------------------------------")
         # print("line:", line)
         if "=" in line:
+            # make new entry in dict
             keyword, value = line.split("=", 1)
             keyword = keyword.strip()
+            
+            
             value = value.strip()
             keywords[keyword] = []
             new = True
@@ -92,13 +115,13 @@ def read(mdf_file):
         if not (keyword == "Commnt"):
             value = _RHS2val_(value)
             if new:
-                keywords[keyword] = value
+                keywords[keyword] = value # either do [value] here
             else:
                 if type(value) is str:
                     keywords[keyword] = keywords[keyword] + value
                 else:
-                    # print("type", type(keywords[keyword]))
-                    keywords[keyword].append(value)
+                    # append a value to existing keyword
+                    keywords[keyword].append(value[0])
 
     f.close()
 

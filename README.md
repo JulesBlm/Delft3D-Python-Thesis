@@ -1,7 +1,7 @@
 # Delft3D-FLOW Python Tools for humans
 ### Declarative Delft3D-FLOW file generation and visualisation
 
-## I will soon split the functionality and clean the notebooks in this repo in [a seperate repo](https://github.com/JulesBlm/pyDelft3D-FLOW)
+## I will soon organize and split the functionality and clean the notebooks in this repo in [a seperate repo](https://github.com/JulesBlm/pyDelft3D-FLOW)
 
 Some sane tools for my thesis too ease the pain of having to work with Deltares' [Delft3D-FLOW](https://oss.deltares.nl/documents/183920/185723/Delft3D-FLOW_User_Manual.pdf)'s insane file formats and to automate the tedious manual labor involved in setting up multiple succesive simulations. Also processes NetCDF for plotting with Holoviews and PyVista.
 
@@ -54,23 +54,31 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
 
 ## Potential To Do list
 
-1. Filter early with xarray.where() for 3d (timeslider) plots, instead of opacity hack or thresholding with pyvista
-2. Clean poetry.lock and pyproject.toml of unused deps
-3. Better documentation
-4. Convert functionality in `GenerateBCRecords.ipynb` to a seperate .py file
-5. Script for reading and writing Morphology files (especially underlayers)
-6. Rename sediments (constituents) dimensions in dataset for labeled selection.
-7. Notebook showing overview of MDF file
-8. Use Panel for better & cleaner widgets, both for hvPlot and for PyVista
-9. Properly structure JulesD3D folder as package
-10. Use ufuncs to increase performance in process 
+1. Use pandas for file reading and writing D3D files	
+  1. Has nice display views too
+2. [HTML repr strings](https://ipython.readthedocs.io/en/stable/config/integrating.html)
+3. Option to use h5py instead of netCDF4
+4. Better plotting of underlayers
+  1. Subtract from depth?
+  2. Add time dependent, multi-dimensional coords following DP_BEDLYR for interactive plotting with hvPlot
+5. Filter early with xarray.where() for 3d PyVista (timeslider) plots, instead of opacity hack or thresholding with pyvista
+6. Clean poetry.lock and pyproject.toml of unused deps
+7. Make use of Unit-based arrays with Pint and xarray
+8. Better documentation
+9. Convert functionality in `GenerateBCRecords.ipynb` to a seperate .py file
+10. Script for reading and writing Morphology files (especially underlayers)
+11. Rename sediments (constituents) dimensions in dataset for labeled selection.
+12. Notebook showing overview of MDF file
+13. Use Panel for better & cleaner widgets, both for hvPlot and for PyVista
+14. Properly structure JulesD3D folder as package
+15. Use ufuncs to increase performance in process 
    1. Add depth
    2. Vector sums (velocity, bottom stress, sediments etc)
-11. Move notebooks to separate folders
-12. Check location of values on staggered grid (face vs edge etc) maybe use parts of [Gridded](https://github.com/NOAA-ORR-ERD/gridded) for this
-13. Improve code quality and clean notebooks. Less hardcoded variables, more functions
+16. Move notebooks to separate folders
+17. Check location of values on staggered grid (face vs edge etc) maybe use parts of [Gridded](https://github.com/NOAA-ORR-ERD/gridded) for this
+18. Improve code quality and clean notebooks. Less hardcoded variables, more functions
    * Read up on Python OOP/classes
-14. Find a way to add coordinates to the whole dataset, for vertical cross-sections.
+19. Find a way to add coordinates to the whole dataset, for vertical cross-sections.
 
 ## Credits
 

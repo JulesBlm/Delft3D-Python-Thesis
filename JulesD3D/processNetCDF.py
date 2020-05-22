@@ -12,7 +12,7 @@ from os import path
 from IPython.display import Markdown as md 
 
 # def renameConstituents
-# # attempt to rename constituents dict to sediment names but doesnt work yet
+# # attempt to rename constituents dict of indexes to sediment names but doesnt work yet
 ## Also for turbulent quantities!
 # sediments = [sed.decode('UTF-8').strip() for sed in trim.NAMCON.values]
 # # # just for loop on size of seds
@@ -21,9 +21,10 @@ from IPython.display import Markdown as md
 #     1: sediments[1]
 # }
 # trim['LSTSCI'] = sediments
-# ayye = trim.rename_dims({'LSTSCI': 'sed'})
-# ayye.sed
+# renamed = trim.rename_dims({'LSTSCI': 'sed'})
+# renamed.sed
 
+# Or just check the dummy cells out
 def fixCORs(dataset):
     '''
     Last column and row of XCOR and YCOR are 0, this fixes that. Nice for plotting
@@ -60,15 +61,16 @@ def makeMeshGrid(length=45000, width=18000, x_gridstep=300, y_gridstep=300):
 
     xDim, yDim = [len(xList), len(yList)]
     print(xDim, "x", yDim, "grid")
-
+ 
     XZ, YZ = np.meshgrid(xList, yList) 
     
     return XZ.T, YZ.T # Why transpose again tho?
 
 def fixMeshGrid(dataset, mystery_flag=False):
     '''
+    Maybe this is not necessary if masks are applied properly
     Derives gridsteps and dimensions from passed DataSet
-    Assumes uniform grid, curvilinear grid wont work!
+    Assumes uniform grid, curvilinear grid wont work here!
     Reference to XZ and YZ need to be passed explicitly because Dask loads the netCDF lazily
     The mystery flag is a Boolean because sometimes 1 and sometimes 2 gridsteps need to be subtracted from the length ¯\_(ツ)_/¯ , don't really know why (even vs uneven?)
     '''
@@ -151,6 +153,7 @@ def addDepth(dataset):
 def addUnderlayerCoords(dataset):
     '''
     Add underlayer coordinates to these data variables, which is nice for interactive plotting with Holoviews/hvPlot
+    TODO: Use DP_BEDLYR to set for MSED and LYRFRAC as underlayer depth coords so depth
     '''
     
     dataset['MSED'] = dataset.MSED.assign_coords(nlyr=dataset.nlyr.values)
@@ -205,6 +208,8 @@ def makeVectorSumsSediments(dataset, sediment_dicts=[]):
         'attrs': {'long_name': 'Some long name', 'units': 'm', 'grid': 'grid', 'location': 'edge1'},
         'dims': ('time', 'M', 'N'),
         'new_key': 'susp_load', 
+        
+    TODO: Make more efficient with dask?
     '''
     if not sediment_dicts:
         raise Exception("The provided list of sediment components is empty. Stopping")
@@ -342,15 +347,16 @@ def writeCleanDataset(dataset_filename, chunks=10, mystery_flag=False):
 
 
 # Why is this a seperate function and not in addDepth by default again?
-# Could't I add depth coords to every data_var there? 
+# Could't I add depth coords to every data_var there with .map? 
 # Things blew up when there are many multi-dimensional coords I think? eg depth, depth_center, N_KMAXOUT_RESTR, M_KMAXOUT_RESTR, N_KMAXOUT, M_KMAXOUT
-# Think holoviews gets confused about which coords to take when there are 6 different multi-dim options
-# How to add multiple kwargs that do the kidna the same thing?
-def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False):
+# Think holoviews gets confused about which coords to take when there are 6 different multi-dimensional options
+# How to add multiple kwargs that do the kinda the same thing? ie along_length along_width
+def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False, N=0, M=0):
     '''
     Returns DataArray that has extra coords meshgrid for convenient vertical plotting
     By default along length, set to along_length=False to get section along width
     TODO: proper time-dependant vertical meshgrid
+    TODO: selecting the 0th index of YZ or XZ only works if the grid is uniform rectilinear
     '''
     if keyword not in dataset:
         raise Exception(f"Can't find {keyword} in DataSet")
@@ -369,17 +375,17 @@ def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False):
 
         if along_length:
             # make a mesh grid along length
-            mesh_N_lyr, _ = xr.broadcast(dataset.YZ[0], dataset.SIG_LYR)
+            mesh_N_siglyr, _ = xr.broadcast(dataset.YZ[0], dataset.SIG_LYR)
 
-            N_KMAXOUT_RESTR = xr.DataArray(mesh_N_lyr, dims=['N', 'KMAXOUT_RESTR'], 
+            N_KMAXOUT_RESTR = xr.DataArray(mesh_N_siglyr, dims=['N', 'KMAXOUT_RESTR'], 
                                     coords={'N': dataset.N, 'KMAXOUT_RESTR': dataset.KMAXOUT_RESTR},
                                     attrs={'units':'m', 'long_name': 'Y-SIG_LYR Meshgrid'})
 
             vertical_slice.coords["N_KMAXOUT_RESTR"] = N_KMAXOUT_RESTR   
         else: 
-            mesh_M_lyr, _ = xr.broadcast(dataset.XZ[:,0], dataset.SIG_LYR)
+            mesh_M_siglyr, _ = xr.broadcast(dataset.XZ[:,0], dataset.SIG_LYR)
 
-            M_KMAXOUT_RESTR = xr.DataArray(mesh_M_lyr, dims=['M', 'KMAXOUT_RESTR'], 
+            M_KMAXOUT_RESTR = xr.DataArray(mesh_M_siglyr, dims=['M', 'KMAXOUT_RESTR'], 
                                         coords={'M': dataset.M, 'KMAXOUT_RESTR': dataset.KMAXOUT_RESTR},
                                         attrs={'units':'m', 'long_name': 'X-SIG_LYR Meshgrid'})
 
@@ -407,7 +413,6 @@ def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False):
                                         attrs={'units':'m', 'long_name': 'X-SIG_INTF Meshgrid'})
 
             vertical_slice.coords["M_KMAXOUT"] = M_KMAXOUT
-            
     else:
         raise Exception('This DataArray does not have the right dimensions (KMAXOUT or KMAXOUT_RESTR)')
     

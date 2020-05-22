@@ -56,7 +56,7 @@ def folderPicker(foldername, prefix='', suffix=''):
     
     return select_nc_filename
 
-# TODO: Day is WRONG!
+# TODO: Day in following months is WRONG!
 def easyTimeFormat(datetimestring):
     '''Formats np.datetime64 to nice string with Day hours minutes seconds'''
     t = to_datetime(str(datetimestring)) 

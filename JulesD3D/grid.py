@@ -75,15 +75,15 @@ class Grid(object):
 
         nDim, mDim = np.shape(self.x)
 
-        f.write("* Created at " + str(datetime.datetime.now()) + "\n")
+        f.write(f"* Created at {str(datetime.datetime.now())}\n")
         f.write(
             "* by Jules' modified OpenEarth Tools \n" + 
             "* Git url: https://github.com/JulesBlm/Delft3D-Python-Tools/Jules/grid.py $\n"
         )
-        f.write("Coordinate System = " + self.properties["Coordinate System"] + "\n")
-        coordinatesString = '      {}      {}\n'.format( formatInt(mDim), formatInt(nDim) )
+        f.write(f"Coordinate System = {self.properties['Coordinate System']}\n")
+        coordinatesString = f'      {formatInt(mDim)}      {formatInt(nDim)}\n'
         f.write(coordinatesString)
-        properties = ' {} {} {}\n'.format(formatInt(self.properties["xori"]), formatInt(self.properties["yori"]), formatInt(self.properties["alfori"]) )
+        properties = f" {formatInt(self.properties['xori'])} {formatInt(self.properties['yori'])} {formatInt(self.properties['alfori'])}\n"
         f.write(properties)
 
         max_m_lines = 5

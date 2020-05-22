@@ -10,21 +10,12 @@
 | SBUUA, SBVVA | Stat stuff: Average bed-load transport  | (avgtime, LSEDTOT, MC, N) | (avgtime, LSEDTOT, M, NC) |
 | SSUUA, SSVVA | Stat stuff: Average suspended-load transport | (avgtime, LSEDTOT, MC, N) |(avgtime, LSEDTOT, MC, N)|
 
-# Most important for me
-| Keyword | Description |Dimensions|
-|-----------|-------------|-------------|
-| RHO   | Density per layer in sigma point | (time, KMAXOUT_RESTR, M, N) |
-| WPHY  | W-velocity per layer in sigma point : sediment fall velocity? (m/s) | (time, KMAXOUT_RESTR, M, N) |
-| W   | W-omega per layer in sigma point : wave angle? | (time, KMAXOUT, M, N) |
-| R1  | Concentrations per layer in sigma point | (time, LSTSCI, KMAXOUT_RESTR, M, N) |
-| WS  | Settling velocity per sigma-layer | (time, LSED, KMAXOUT, M, N) |
-
 ## Bottom surface properties
 | Keyword | Description | Dimensions|
 |-----------|-------------|---------|
 | DM        | Arithmetic mean sediment diameter | (time, M, N) |
 | DG        | Geometric mean sediment diameter | (time, M, N) |
-| DMSEDCUM  | Accumulated net sedimentation flux | (time, LSEDTOT, M, N)|
+| DMSEDCUM  | Accumulated  net sedimentation over the period between two map-file output times $\frac{kg}{m^2}$ | (time, LSEDTOT, M, N)|
 | TAUKSI, TAUETA | Vector comps; Bottom stress in U,V - point | (time, MC, N) |
 
 ## Underlayer properties
@@ -39,22 +30,22 @@
 |-----------|-------------|---------|
 | grid| Attributes describing [SGRID](https://sgrid.github.io/sgrid/) ||
 | DPS       | Bottom depth (sigma point) | (time, M, N) |
-| NAMCON          | Name of constituent quantity (sediments, solvents(?)) | (LSTSCI) |
-| NAMTUR          | Name of turbulent quantities | (LTUR) |
-| SIG_LYR         | Sigma coordinates of layer centres| -|
-| SIG_INTF        | Sigma coordinates of layer interfaces|-|
-| LSTSCI          | Constituents|-|
-| LSEDTOT | Array with indices of Sediments | - |
+| NAMCON          | Name of constituent quantity (eg sediments, solvents, tracers) | (LSTSCI) |
+| NAMTUR          | Name of turbulent quantities (eg Turbulent energy, Energy dissipation) | (LTUR) |
+| SIG_LYR         | Sigma-coordinates of layer centres | -|
+| SIG_INTF        | Sigma-coordinates of layer interfaces |-|
+| LSTSCI          | Array of indices for constituents (eg sediments, solvents, tracers) |-|
+| LSEDTOT | Array with indices for sediments (total?) | - |
 | LSED | Also array with indices of Sediments, no idea what the difference between this and LSEDTOT is  ¯\_(ツ)_/¯ | - |
 | KMAXOUT         | User selected output layer interfaces|-|
 | KMAXOUT_RESTR   | User selected output layer centres|-|
-| GRAVITY         | Gravitational acceleration $\left(\frac{m}{s^2}\right)$ |-|
+| GRAVITY         | Gravitational acceleration constant $\left(\frac{m}{s^2}\right)$ |-|
 | RHOCONST | User specified constant density $\left(\frac{kg}{m^3}\right)$ | -|
-| time| List of datetimes of outputsteps |time|
-| XZ | X Meshgrid |-|
-| YZ | Y Meshgrid |-|
-| XCOR | X-coordinate of grid points |-|
-| YCOR | Y-coordinate of grid points |-|
+| time| List of datetimes of outputsteps following [CF conventions](http://cfconventions.org/cf-conventions/cf-conventions.html) |(time)|
+| XZ | X Meshgrid of face coordinates |-|
+| YZ | Y Meshgrid of face coordinates |-|
+| XCOR | X-coordinate of grid points (ie the  grid nodes) |-|
+| YCOR | Y-coordinate of grid points (ie the grid nodes) |-|
 | M| face dimensions (M:MC (padding: low) |-|
 | N| face dimensions (N:NC (padding: low)) |-|
 | MC| node dimensions |-|
@@ -65,26 +56,36 @@
 
 
 ## Various
-| Keyword | Description |
-|-----------|-------------|
-|GSQS          | Horizontal area of computational cell |
-|DPS0          | Initial bottom depth at sigma points (positive down) |
-|DPU0          | Initial bottom depth at u points (positive down) |
-|DPV0          | Initial bottom depth at v points (positive down) |
-|ALFAS         | Orientation ksi-axis w.r.t. pos.x-axis at water level point |
-|PPARTITION    | Partition |
-|TAUMAX        | Tau_max in sigma points (scalar |
-|UMNLDF        | Filtered U-velocity |
-|VMNLDF        | Filtered V-velocity |
-|STD_SSUV      | Standard deviation of total suspended transport |
-|MORFAC        | morphological acceleration factor (MORFAC) |
-|MORFT         | morphological time (days since start of simulation |
-|MFTAVG        | morphological time (days since start of simulation) |
-|MORAVG        | average MORFAC used during averaging period |
+| Keyword | Description | Dimensions |
+|-----------|-------------|---------|
+|GSQS          | Horizontal area of computational cell | (M, N) |
+| RHO   | Density per layer in sigma point | (time, KMAXOUT_RESTR, M, N) |
+| R1  | Concentrations per layer in sigma point | (time, LSTSCI, KMAXOUT_RESTR, M, N) |
+| WPHY  | W-velocity per layer in sigma point : sediment fall velocity? (m/s) | (time, KMAXOUT_RESTR, M, N) |
+| W   | W-omega per layer in sigma point : wave angle? | (time, KMAXOUT, M, N) |
+| WS  | Settling velocity per sigma-layer | (time, LSED, KMAXOUT, M, N) |
+|S1        | Water-level in sigma point|(time, M, N)|
+|DPS0          | Initial bottom depth at sigma points (positive down) ||
+|DPU0          | Initial bottom depth at u points (positive down) ||
+|DPV0          | Initial bottom depth at v points (positive down) ||
+|ALFAS         | Orientation ksi-axis w.r.t. pos.x-axis at water level point ||
+|PPARTITION    | Partition (???) |(M, N)|
+|TAUMAX        | Tau_max in sigma points (scalar) ie max bottom stress $\frac{N}{m^2}$ | (time, M, N)|
+|UMNLDF        | Filtered U-velocity |(time, MC, N)|
+|VMNLDF        | Filtered V-velocity |(time, M, NC)|
+|MORFAC        | Morphological acceleration factor (MORFAC) | (time) |
+|MORFT         | Morphological time (days since start of simulation ||
+|MFTAVG        | Morphological time (days since start of simulation) |(avgtime)|
+|MORAVG        | Average MORFAC used during averaging period ||
 
 ### Stat stuff
 
-These can be toggled in the morphology file under output with `StatVelocity: min, max, mean, and std`
+These can be toggled in the morphology file under output with
+
+`   StatWaterDepth   = MIN MAX MEAN STD             
+   StatVelocity     = MIN MAX MEAN STD             
+   StatBedLoad      = MIN MAX MEAN STD             
+   StatSuspload     = MIN MAX MEAN STD`
 
 | Keyword | Description |
 |-----------|-------------|
@@ -96,6 +97,7 @@ These can be toggled in the morphology file under output with `StatVelocity: min
 |MAX_UV        | Maximum velocity |
 |MEAN_UV       | mean velocity |
 |STD_UV        | Standard deviation of velocity |
+|STD_SSUV    | Standard deviation of total suspended transport ||
 |MIN_SBUV      | Minimum total bedload transport |
 |MAX_SBUV      | Maximum total bedload transport |
 |MEAN_SBUV     | Mean total bedload transport |
@@ -114,10 +116,9 @@ These can be toggled in the morphology file under output with `StatVelocity: min
 | KCV | Mask array for V-velocity points |
 
 
-## Others
+## Turbulence modelling
 | Keyword | Description | Dimensions|
 |-----------|-------------|---------|
-|S1        | Water-level in sigma point|(time, M, N)|
 |RTUR1     | Turbulent quantity per layer in sigma point (1. Turbulent Kinetic Energy $k$ and 2. Turbulent energy dissipation $\epsilon$) |(time, LTUR, KMAXOUT, M, N)|
 |VICWW     | Vertical eddy viscosity-3D in sigma point|(time, KMAXOUT, M, N)|
 |DICWW     | Vertical eddy diffusivity-3D in sigma point|(time, KMAXOUT, M, N)|

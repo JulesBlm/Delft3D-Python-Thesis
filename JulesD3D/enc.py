@@ -85,8 +85,8 @@ class Enclosure():
             return enc
 
     def getXY(self):
-#         if self.x or not self.y:
-#             raise Exception("No coords in this object")
+        if not self.x or not self.y:
+            raise Exception("No coords in this object")
         
         return self.x, self.y
         

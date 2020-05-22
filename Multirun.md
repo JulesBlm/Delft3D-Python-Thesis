@@ -8,11 +8,11 @@
     * Change smoothing time to zero `Tlfsmo = 0.0000000e+000`
     * Change times of restart and history files:
 
-    `Flmap = TStart output_time_step(remains the same) Tend`
+    `Flmap = T_start output_time_step(remains the same) T_end`
 
-    `Flhis = TStart output_time_step(remains the same) Tend`
+    `Flhis = T_start output_time_step(remains the same) T_end`
 
-    * Due to a bug in Delft3D, NetCDF cannot restart a map file from a specific time. Therefore the index of the output step must be used. This is restart time step is calculated automatically and added with `Restid_timeindex` keyword and value. This is the only way to restart from a netCDF map file!
+    * Due to a bug in Delft3D-FLOW, NetCDF cannot restart a map file from a specific time. Therefore, the index of the output step must be used. This is restart time step is calculated automatically and added with `Restid_timeindex` keyword and value. This is the only way to restart from a netCDF map file!
 
   * Morphology .mor file
 

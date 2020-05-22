@@ -1,13 +1,13 @@
-# todo: DRY makeStructuredGridInterfaces and makeStructuredGridInterface, merge into one function/class
-# TODO Too much repition in this function,all follow same sequence of stacking
-# Make parent MakeBottom surface function/class and inherit from that?
+# todo: 
+# * DRY makeStructuredGridInterfaces and makeStructuredGridInterface, 
+# * Too much repition in thes functions, all follow same sequence of stacking 
+# * Make parent MakeBottom surface function/class and inherit from that?
 
 import pyvista as pv
 import xarray as xr
 import datetime
 import numpy as np
 from JulesD3D.processNetCDF import addDepth, fixCORs, fixMeshGrid
-
 
 def makeBottomSurface(dataset, timestep=-1, mystery_flag=False):
     '''
@@ -16,7 +16,7 @@ def makeBottomSurface(dataset, timestep=-1, mystery_flag=False):
     dataset = fixCORs(dataset)
     if 'depth_center' not in dataset:
         print("NetCDF is not preprocessed")
-        dataset = fixMeshGrid(dataset, dataset.XZ.values, dataset.YZ.values, mystery_flag=True)    
+        dataset = fixMeshGrid(dataset, mystery_flag=mystery_flag)    
     
     plot_x_mesh = dataset.XCOR.values[1:-1,1:-1]
     plot_y_mesh = dataset.YCOR.values[1:-1,1:-1]
@@ -41,7 +41,6 @@ def makeStructuredGridDepth(dataset, keyword='SIG_LYR'):
         
     nr_sigma = dataset[keyword].size
     
-    # Repair XCOR and YCOR anyway
     dataset = fixCORs(dataset)
     
     # XCOR or XZ?
@@ -67,15 +66,21 @@ def makeStructuredGridDepth(dataset, keyword='SIG_LYR'):
     
     return depth_grid
 
-def makeStructuredGridUnderlayers(dataset, time=-1, LSED=0):
+def makeStructuredGridUnderlayers(dataset, time=-1, LSED=0): 
     '''
     Pass the Delft3D-FLOW DataSet and pass the outputstep index; get back a 3D PyVista mesh of the underlayers with sed volfrac and (wow!)
     
     Keyword arg: sed_index LSED index to add to structuredGrid
     Why not add all sediments? Pass in dict with name and index or get names from dataset ie from dataset.NAMCON
-
+    # Something like this:
+    
     for sed in trim.LSED:
-        add sed to struct grid
+        name = dataset.NAMCOM[sed].decode('UTF-8') 
+        
+        vol_frac_values_at_time = dataset.LYRFRAC.isel(time=time, LSEDTOT=sed).transpose('M', 'N', 'nlyr')    
+        underlayer_grid[f"Vol fraction of {name} in layer"] = mass_sed_at_time.values.ravel()
+
+        # now do same for MSED
     '''
     print("Making StructuredGrid for underlayers at outputstep", time)
     if 'DP_BEDLYR' not in dataset: # or 'depth_center'
@@ -102,12 +107,12 @@ def makeStructuredGridUnderlayers(dataset, time=-1, LSED=0):
     underlayer_grid.points = xyz
     underlayer_grid.dimensions = [nr_of_underlayers, dataset.N.size, dataset.M.size]
     
-    vol_frac_sed_at_time = dataset.LYRFRAC.isel(time=time, LSEDTOT=0).transpose('M', 'N', 'nlyr')
-
-    
-    underlayer_grid["vol_frac_sand"] = vol_frac_sed_at_time.values.ravel()
+    vol_frac_sed_at_time = dataset.LYRFRAC.isel(time=time, LSEDTOT=0).transpose('M', 'N', 'nlyr')    
+    # shouldn't hardcode title
+    underlayer_grid["Volume fraction sand"] = vol_frac_sed_at_time.values.ravel()
     
     mass_sed_at_time = dataset.MSED.isel(time=time, LSEDTOT=LSED).transpose('M', 'N', 'nlyr')
-    underlayer_grid["mass_sand"] = mass_sed_at_time.values.ravel()
+    # shoudln't hardcode title    
+    underlayer_grid["Mass of sand in layer"] = mass_sed_at_time.values.ravel()
     
     return underlayer_grid
