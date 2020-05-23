@@ -4,23 +4,23 @@ import JulesD3D.mdf as mdf
 from JulesD3D.utils import formatSci
 
 
-
-# TODO: split into more composable functions
-def replaceText(filename, new_filename, text_to_find, replacement_text):   
-    with fileinput.FileInput(filename) as file, open(new_filename, 'w') as outfile: # inplace=True, backup='.bak')
+def replaceText(filename, new_filename, text_to_find, replacement_text):
+    with fileinput.FileInput(filename) as file, open(new_filename, 'w') as outfile:
         for line in file:
             outfile.write(line.replace(text_to_find, replacement_text))
 
-# example: makeMultipleRuns(template_folder='/Users/your_folder_with_runs/Runs/2_5050/Run',\
-#                            restId_base='trim-60km_300m_W60Channel', number_of_runs=5)
+# split into more functions
 def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, init_MorStt="9.0000000e+000",
                      new_Tlfsmo=0, removeNetCdf=False, Restid_timeindex=None):
     '''
     Takes a 'template_folder' and writes 'number_of_runs' new folders with times and some other parameters adjusted for subsequent restarts.
     
+    example: makeMultipleRuns(template_folder='/Users/your_folder_with_runs/Runs/2_5050/Run', number_of_runs=5)
+
+    
     Arguments
     ---------
-    restId_base: String that is added to "RestId" keyword in all subsequent runs. Only useful if restartId argument is not equal to the .mdf filename
+    restId_base: String that is added to "RestId" keyword in all subsequent runs. Only useful if restartId argument is not equal to the .mdf filename in the template folder
 
     init_MorStt: String containing initial value for 'MorSst' key in .mor file.
     is changed to 0 for all subsequent runs by default, default string to replace is '9.0000000e+000'
@@ -77,9 +77,7 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
         print('Can\'t find .mor file in folder')
 
     mdf_filepath = os.path.join(template_folder, mdf_filename)
-    mdf_dict, inp_order = mdf.read(mdf_filepath)
-    inp_order.append('Restid') # Append a restart ID tag to the MDF
-    inp_order.append('Restid_timeindex')
+    mdf_dict = mdf.read(mdf_filepath)
 
     exclude_flags = []
     if 'FlNcdf' in mdf_dict and removeNetCdf == True:
@@ -113,7 +111,6 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
         new_start_time = run * init_end_time
         new_end_time = (run + 1) * init_end_time
         
-        # Could be more efficient if 
         if run > 0:
             new_mdf_dict = copy.deepcopy(mdf_dict)
 
@@ -153,7 +150,7 @@ def makeMultipleRuns(template_folder=None, number_of_runs=2, restId_base=None, i
             new_mdf_dict['Restid'] = f'{restId_base}Run{run:02}'
             
             new_mdf_filename = os.path.join(new_run_folder, mdf_filename)
-            mdf.write(new_mdf_dict, new_mdf_filename, selection=inp_order, exclude=exclude_flags)
+            mdf.write(new_mdf_dict, new_mdf_filename, exclude=exclude_flags)
             
             # Change spin-up interval (MorStt) for morphological changes to 0 in .mor file            
             template_morph_filename = os.path.join(template_folder, morph_filename)

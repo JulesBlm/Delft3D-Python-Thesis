@@ -1,10 +1,10 @@
 """
 Read/write Delft3D-FLOW *.mdf input files to/from dictionary
 Todo:
-* Split Runtxt correctly
-* Use a pandas DataFrame instead of dict
+* Split and write Runtxt correctly
 """
 from JulesD3D.utils import formatSci
+from collections import OrderedDict
 
 #  Copyright notice
 #   --------------------------------------------------------------------
@@ -55,28 +55,19 @@ def _RHS2val_(line, verbose=False):
         value = line.strip()
         split_value = value.split()
         
-        if verbose: print("split value", split_value)
+        if verbose: print("split value", split_value) 
+        
         value = [float(value) for value in split_value]
-
-        # print(value)
-
         
     return value
 
 def read(mdf_file, verbose=False):
-    # doesnt read columnwise keywords correctly
     """Read Delft3D-Flow *.mdf file into dictionary.
-      >> inp, inp_order = mdf.read('a.mdf')
+      >> inp = mdf.read('a.mdf')
    Note that all comment lines and keyword formatting are not preserved.
-   And mind that inp is a dictionary where the file's keyword order
-   is not preserved. The order from the file
-   is therefore also be returned in variable inp_order.
-   This can be ignored in 2 standard python ways:
-      >> inp,_ = mdf.read('a.mdf')
-      >> inp   = mdf.read('a.mdf')[0]"""
+    """
 
-    keywords = {}
-    keyword_order = []
+    keywords = OrderedDict()
 
     f = open(mdf_file, "r")
 
@@ -95,18 +86,14 @@ def read(mdf_file, verbose=False):
     ]
     
     for line in f.readlines():
-        # print("------------------------- NEW LINE ----------------------------------")
-        # print("line:", line)
         if "=" in line:
             # make new entry in dict
             keyword, value = line.split("=", 1)
             keyword = keyword.strip()
             
-            
             value = value.strip()
             keywords[keyword] = []
             new = True
-            keyword_order.append(keyword)
 
         elif not (keyword == "Commnt"):
             value = line.lstrip()
@@ -120,12 +107,12 @@ def read(mdf_file, verbose=False):
                 if type(value) is str:
                     keywords[keyword] = keywords[keyword] + value
                 else:
-                    # append a value to existing keyword
+                    # append a lone value to existing keyword
                     keywords[keyword].append(value[0])
 
     f.close()
 
-    return keywords, keyword_order
+    return keywords
 
 
 def _val2RHS_(f, keyword, value):
@@ -160,7 +147,7 @@ def _val2RHS_(f, keyword, value):
         if keyword in columnwise_list:
             f.write(f"{keyword.ljust(7)}=  {formatSci(value[0])}\n")
             for val in value[1:]:
-                f.write(f"          {formatSci(val[0])}\n")
+                f.write(f"          {formatSci(val)}\n")
         else: 
             # Write these as simple integers
             if keyword in ['MNKmax', 'Iter', 'ncFormat', 'ncDeflate', 'Dt', 'Tzone', 'Restid_timeindex']: 
@@ -173,49 +160,35 @@ def _val2RHS_(f, keyword, value):
             sci_string_to_write = f"{keyword.ljust(7)}=  {joined_values}\n"
             f.write(sci_string_to_write)
 
-def write(keywords, mdf_file, **kwargs):
+def write(keywords, mdf_filename=None, exclude=[]):
 
     """Write dictionary to Delft3D-FLOW *.mdf file.
-   The keywords are written in ramdom order,
+   The keywords are written in order,
       >> mdf.write(inp, 'b.mdf')
-   An keyword 'selection' can be passed containing the 
-   desired order (for instance resurned by mdf.read())
-      >> inp, order = mdf.read('a.mdf')
-      >> mdf.write(inp, 'b.mdf',selection=order)
-   This can also be used to write only a subset of keywords to file.
-      >> mdf.write(inp,'c.mdf',selection=['Runtxt','MNKmax'])
+      >> inp = mdf.read('a.mdf')
+      >> mdf.write(keywords, 'b.mdf')
       
-   To ignore a keyword use keyword 'exclude', e.g. to enforce cold start:
+   To ignore a keyword use keyword 'exclude' with list of keywords to ignore, e.g. to enforce cold start:
       >> mdf.write(inp,'c.mdf',exclude=['Restid']) 
       
    Example: modify time step Dt of collection Delft3D-FLOW simulations:
       >> import mdf, glob, os
       >> mdf_list = glob.glob('*.mdf');
       >> for mdf_file in mdf_list:
-      >>    inp, ord = mdf.read(mdf_file)
+      >>    inp = mdf.read(mdf_file)
       >>    inp['Dt'] = [1]
       >>    mdf_base, ext = os.path.splitext(mdf_file)
-      >>    mdf.write(inp, mdf_base + '_dt=1' + ext, selection=ord)
+      >>    mdf.write(inp, mdf_base + '_dt=1' + ext)
       """
+    if not mdf_filename:
+        print("No filename provided, file will be written is new.mdf in current folder")
+        mdf_filename = "new.mdf"
 
-    OPT = {}
-    OPT["selection"] = []
-    OPT["exclude"] = []
+    f = open(mdf_filename, "w")
 
-    for k, v in kwargs.items():
-        OPT[k] = v
-
-    f = open(mdf_file, "w")
-
-    if OPT["selection"] is None:
-        for keyword in keywords:
-            if not (keyword in OPT["exclude"]):
-                value = keywords[keyword]
-                _val2RHS_(f, keyword, value)
-    else:
-        for keyword in OPT["selection"]:
-            if not (keyword in OPT["exclude"]):
-                value = keywords[keyword]
-                _val2RHS_(f, keyword, value)
+    for keyword in keywords:
+        if not (keyword in exclude):
+            value = keywords[keyword]
+            _val2RHS_(f, keyword, value)
 
     f.close()
