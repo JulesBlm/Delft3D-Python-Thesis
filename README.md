@@ -56,29 +56,30 @@ This is very much a work in progress so it's all still very messy and hacky:  ¯
 
 1. Use pandas for file reading and writing D3D files	
   1. Has nice display views too
-2. [HTML repr strings](https://ipython.readthedocs.io/en/stable/config/integrating.html)
-3. Option to use h5py instead of netCDF4
-4. Better plotting of underlayers
+2. Finish Overarching d3d class
+3. [HTML repr strings](https://ipython.readthedocs.io/en/stable/config/integrating.html)
+4. Option to use h5py instead of netCDF4
+5. Better plotting of underlayers
   1. Subtract from depth?
   2. Add time dependent, multi-dimensional coords following DP_BEDLYR for interactive plotting with hvPlot
-5. Filter early with xarray.where() for 3d PyVista (timeslider) plots, instead of opacity hack or thresholding with pyvista
-6. Clean poetry.lock and pyproject.toml of unused deps
-7. Make use of Unit-based arrays with Pint and xarray
-8. Better documentation
-9. Convert functionality in `GenerateBCRecords.ipynb` to a seperate .py file
-10. Script for reading and writing Morphology files (especially underlayers)
-11. Rename sediments (constituents) dimensions in dataset for labeled selection.
-12. Notebook showing overview of MDF file
-13. Use Panel for better & cleaner widgets, both for hvPlot and for PyVista
-14. Properly structure JulesD3D folder as package
-15. Use ufuncs to increase performance in process 
+6. Filter early with xarray.where() for 3d PyVista (timeslider) plots, instead of opacity hack or thresholding with pyvista
+7. Clean poetry.lock and pyproject.toml of unused deps
+8. Make use of Unit-based arrays with Pint and xarray
+9. Better documentation
+10. Convert functionality in `GenerateBCRecords.ipynb` to a seperate .py file
+11. Script for reading and writing Morphology files (especially underlayers)
+12. Rename sediments (constituents) dimensions in dataset for labeled selection.
+13. Notebook showing overview of MDF file
+14. Use Panel for better & cleaner widgets, both for hvPlot and for PyVista
+15. Properly structure JulesD3D folder as package
+16. Use ufuncs to increase performance in process 
    1. Add depth
    2. Vector sums (velocity, bottom stress, sediments etc)
-16. Move notebooks to separate folders
-17. Check location of values on staggered grid (face vs edge etc) maybe use parts of [Gridded](https://github.com/NOAA-ORR-ERD/gridded) for this
-18. Improve code quality and clean notebooks. Less hardcoded variables, more functions
+17. Move notebooks to separate folders
+18. Check location of values on staggered grid (face vs edge etc) maybe use parts of [Gridded](https://github.com/NOAA-ORR-ERD/gridded) for this
+19. Improve code quality and clean notebooks. Less hardcoded variables, more functions
    * Read up on Python OOP/classes
-19. Find a way to add coordinates to the whole dataset, for vertical cross-sections.
+20. Find a way to add coordinates to the whole dataset, for vertical cross-sections.
 
 ## Credits
 

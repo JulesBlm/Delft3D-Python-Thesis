@@ -167,9 +167,9 @@ class D3DModel(object):
 
     def plotDepthPyVista(self, screenshot=None):
         if not self.depth or not self.grid:
-            raise Exception("Must define grid and depth first")
+            raise Exception("Must define grid and depth before plotting")
         
-        # TODO: use makeBottomSurface from ployPyVista
+        # TODO: use makeBottomSurface from plotPyVista
         depth = self.depth.values[0:-1,0:-1]
         plot_x_mesh = self.grid.x[:-1,:-1]
         plot_y_mesh = self.grid.y[:-1,:-1]
@@ -190,7 +190,3 @@ class D3DModel(object):
 
     # def plotVerticalSection(self):
     # hmmm
-    
-
-    # def plotMap(self)
-        # depth = self.dep.values[0:-1,0:-1] # for plotting

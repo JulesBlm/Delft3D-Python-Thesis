@@ -20,8 +20,10 @@ class Enclosure():
     '''
     def __init__(self, *args, **kwargs):
         self.dims = kwargs.get('dims')
+        
         if not self.dims:
             raise Exception("No tuple of dimenstinos provided?")
+        
         self.filename = kwargs.get('filename')
         xDim, yDim = self.dims
         
@@ -67,8 +69,7 @@ class Enclosure():
             yDim = max(enc_y)
             dims = (xDim, yDim)
             
-            # how do i know from read file wether is has channel
-            
+            # how do i know from read file has channel?
             enc = Enclosure(dims=dims, read_filename=True, x=enc_x, y=enc_y)
             
             enc.x = enc_x
