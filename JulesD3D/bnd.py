@@ -32,6 +32,7 @@ class Boundaries():
     '''
     def __init__(self, filename=None):
         # self.read(self, filename) # one way or the doesnt work with this way
+        self.filename = filename
         self.coords = []
 
     @staticmethod

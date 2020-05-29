@@ -25,11 +25,20 @@
 | LYRFRAC      | Volume fraction of sediment in underlayer | (time, LSEDTOT, nlyr, M, N) |
 | DP_BEDLYR    | Vertical position of sediment layer interface | (time, nlyrp1, M, N) |
 
-# Descriptors/grid/coordinates
+# Constants
+
+| Keyword | Description | Dimensions|
+|-----------|-------------|---------|
+| GRAVITY         | Gravitational acceleration constant $\left(\frac{m}{s^2}\right)$ |-|
+| RHOCONST | User specified constant density $\left(\frac{kg}{m^3}\right)$ | -|
+
+
+# Attributes, grid and coordinates
 | Keyword | Description | Dimensions|
 |-----------|-------------|---------|
 | grid| Attributes describing [SGRID](https://sgrid.github.io/sgrid/) ||
-| DPS       | Bottom depth (sigma point) | (time, M, N) |
+| DPS       | Bottom depth at time (sigma point) | (time, M, N) |
+| DP0  | Initial bottom depth (positive down) | (MC, NC) |
 | NAMCON          | Name of constituent quantity (eg sediments, solvents, tracers) | (LSTSCI) |
 | NAMTUR          | Name of turbulent quantities (eg Turbulent energy, Energy dissipation) | (LTUR) |
 | SIG_LYR         | Sigma-coordinates of layer centres | -|
@@ -39,9 +48,7 @@
 | LSED | Also array with indices of Sediments, no idea what the difference between this and LSEDTOT is  ¯\_(ツ)_/¯ | - |
 | KMAXOUT         | User selected output layer interfaces|-|
 | KMAXOUT_RESTR   | User selected output layer centres|-|
-| GRAVITY         | Gravitational acceleration constant $\left(\frac{m}{s^2}\right)$ |-|
-| RHOCONST | User specified constant density $\left(\frac{kg}{m^3}\right)$ | -|
-| time| List of datetimes of outputsteps following [CF conventions](http://cfconventions.org/cf-conventions/cf-conventions.html) |(time)|
+| time| List of datetimes of output time-steps following [CF conventions](http://cfconventions.org/cf-conventions/cf-conventions.html) |(time)|
 | XZ | X Meshgrid of face coordinates |-|
 | YZ | Y Meshgrid of face coordinates |-|
 | XCOR | X-coordinate of grid points (ie the  grid nodes) |-|
@@ -52,7 +59,6 @@
 | NC| node dimensions |-|
 | nlyr | Number of underlayer |-|
 | nlyrp1 | Interfaces of underlayers |-|
-| DP0  | Initial bottom depth (positive down) | (MC, NC) |
 
 
 ## Various
@@ -125,3 +131,5 @@ These can be toggled in the morphology file under output with
 |RICH      | Richardson number|(time, KMAXOUT, M, N)|
 |VICUV     | horizontal eddy viscosity in zeta point |(time, KMAXOUT_RESTR, M, N)|
 |RCA       | Near-bed reference concentration of sediment|(time, LSED, M, N)|
+| VORTIC |  Vorticity at each layer in depth point $\frac{1}{s}$ | (time, KMAXOUT_RESTR, MC, NC|
+| ENSTRO |  Enstrophy at each layer in depth point  $\frac{1}{s}$ | (time, KMAXOUT_RESTR, MC, NC) |

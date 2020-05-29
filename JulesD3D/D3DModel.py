@@ -3,6 +3,7 @@ import matplotlib.patheffects as PathEffects
 from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 import numpy as np
+from JulesD3D.mdf import Mdf
 from JulesD3D.dep import Depth
 from JulesD3D.grid import Grid
 from JulesD3D.enc import Enclosure
@@ -13,7 +14,16 @@ import pyvista as pv
 
 colormap = deep
 
-# i really should read up on object oriented in Python
+'''
+its a start but its still a big mess
+i really should read up on object oriented in Python
+write the filenames to mdf (Filbnd, FilbcC) and bcc (TimeSeries) files
+Keep track of sediment names > sed mor files
+Keep track of boundary labels > bnd bcc bct files
+Keep track of dimensions > grid, depth, enc files
+'''
+
+
 class D3DModel(object):
     """
     Read a folder containing Delft3D4-FLOW files
@@ -129,7 +139,6 @@ class D3DModel(object):
             # legend
             fig.legend(loc=(0.134,.383), borderpad=0.5)
 
-            
         if depth:
             depth = self.depth.values[0:-1,0:-1]
             min_depth, max_depth = [np.amin(depth), np.max(depth)]
@@ -165,6 +174,7 @@ class D3DModel(object):
         
         return fig, ax, cbar
 
+    # should not be in this class!
     def plotDepthPyVista(self, screenshot=None):
         if not self.depth or not self.grid:
             raise Exception("Must define grid and depth before plotting")

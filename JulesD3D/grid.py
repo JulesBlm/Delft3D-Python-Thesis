@@ -1,6 +1,9 @@
-# TODO: If uniform grid read grid cell size
+'''
+TODO:
+* If uniform grid read grid cell size
+* If 
+'''
 import numpy as np
-from numpy import format_float_scientific
 import datetime
 from JulesD3D.utils import formatSci, formatInt
 
@@ -19,8 +22,44 @@ class Grid(object):
         self.shape = kwargs.get("shape", None)
         self.x = kwargs.get("x", None)
         self.y = kwargs.get("y", None)
-#         self.x_gridstep =
-#         self.y_gridstep = 
+        # following two for rectilinear grids!
+        self.x_gridstep = kwargs.get("x_gridstep", None)
+        self.y_gridstep = kwargs.get("y_gridstep", None)
+        self.newRectilinear()
+
+    def newRectilinear(self):
+        """Makes rectilinear grid with numpy meshgrid"""
+        print("------ Making new Delft3D grid ------")
+        print("x_gridstep", self.x_gridstep)
+        print("y_gridstep", self.y_gridstep)
+        print("width", self.width)
+        print("length", self.length)
+        
+        if self.width % self.x_gridstep:
+            raise Exception("Width is not a multiple of x_gridstep")
+        if self.length % self.y_gridstep:
+            raise Exception("Length is not a multiple of y_gridstep")
+            
+        x_gridstep = self.x_gridstep
+        y_gridstep = self.y_gridstep
+
+        xList = np.array([i for i in range(0, self.width + x_gridstep, x_gridstep)])
+        yList = np.array([i for i in range(0, self.length + y_gridstep, y_gridstep)]) + 100 # + 100 is default start y in REFGRID
+
+        xDim, yDim = [len(xList), len(yList)]
+        print(f"MNKmax = {xDim + 1} {yDim + 1} SIGMALAYERS") # to mdf file
+        
+        print("xDim", xDim)
+        print("yDim", yDim)
+        
+        self.shape.append([xDim, yDim])
+        
+        x_grid, y_grid = np.meshgrid(xList, yList)
+        self.x_grid = x_grid
+        self.y_grid = y_grid
+        self.shape = (xDim, yDim)
+        
+        return x_grid, y_grid
 
     @staticmethod
     def read(filename=None, **kwargs):

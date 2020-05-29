@@ -3,6 +3,8 @@ from numpy import format_float_scientific
 import JulesD3D.mdf as mdf
 from JulesD3D.utils import formatSci
 
+# POTENTIAL TODO:
+# Make use of sedmor.py and TimeSeries.py to replace text in files
 
 def replaceText(filename, new_filename, text_to_find, replacement_text):
     with fileinput.FileInput(filename) as file, open(new_filename, 'w') as outfile:

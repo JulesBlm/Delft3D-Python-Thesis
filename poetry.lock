@@ -44,10 +44,14 @@ description = "Helper for Bézier Curves, Triangles, and Higher Order Objects"
 name = "bezier"
 optional = false
 python-versions = "*"
-version = "2020.2.3"
+version = "2020.5.19"
 
 [package.dependencies]
 numpy = ">=1.18.1"
+
+[package.dependencies.importlib-metadata]
+python = "<3.8"
+version = "*"
 
 [package.extras]
 full = ["matplotlib (>=3.0.0)", "scipy (>=1.4.1)", "sympy (>=1.5.1)"]
@@ -279,7 +283,7 @@ description = "File-system specification"
 name = "fsspec"
 optional = false
 python-versions = ">3.5"
-version = "0.7.3"
+version = "0.7.4"
 
 [[package]]
 category = "main"
@@ -374,7 +378,7 @@ version = "0.4.2"
 [[package]]
 category = "main"
 description = "Read metadata from Python packages"
-marker = "python_version < \"3.8\""
+marker = "python_version < \"3.8\" and platform_system == \"Windows\" or python_version < \"3.8\""
 name = "importlib-metadata"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
@@ -411,7 +415,7 @@ description = "IPython Kernel for Jupyter"
 name = "ipykernel"
 optional = false
 python-versions = ">=3.5"
-version = "5.2.1"
+version = "5.3.0"
 
 [package.dependencies]
 appnope = "*"
@@ -920,7 +924,7 @@ description = "Core utilities for Python packages"
 name = "packaging"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "20.3"
+version = "20.4"
 
 [package.dependencies]
 pyparsing = ">=2.0.2"
@@ -1312,7 +1316,7 @@ description = "Python 2 and 3 compatibility utilities"
 name = "six"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
-version = "1.14.0"
+version = "1.15.0"
 
 [[package]]
 category = "main"
@@ -1435,7 +1439,10 @@ description = "VTK is an open-source toolkit for 3D computer graphics, image pro
 name = "vtk"
 optional = false
 python-versions = "*"
-version = "8.1.2"
+version = "9.0.0"
+
+[package.extras]
+numpy = ["numpy (>=1.9)"]
 
 [[package]]
 category = "main"
@@ -1505,7 +1512,7 @@ version = "0.12.0"
 [[package]]
 category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-marker = "python_version < \"3.8\""
+marker = "python_version < \"3.8\" and platform_system == \"Windows\""
 name = "zipp"
 optional = false
 python-versions = ">=3.6"
@@ -1545,22 +1552,22 @@ backcall = [
     {file = "backcall-0.1.0.zip", hash = "sha256:bbbf4b1e5cd2bdb08f915895b51081c041bac22394fdfcfdfbe9f14b77c08bf2"},
 ]
 bezier = [
-    {file = "bezier-2020.2.3-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:19101cf830f6316e2e8808816017b5661bbbea276f7099ff3a0b6712b6c95d6f"},
-    {file = "bezier-2020.2.3-cp36-cp36m-manylinux2010_i686.whl", hash = "sha256:3472756ac857136865a5fa5f3fcf176ec0ef4c5d1343553f4aee76a0c3c1f408"},
-    {file = "bezier-2020.2.3-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:16562d0d5906e7e270c8b22e98f7509c135908da144a6b84eaa14d4b1730cd2a"},
-    {file = "bezier-2020.2.3-cp36-cp36m-win32.whl", hash = "sha256:5dd23b15f286c541e5b0ad28607d516680ba8bba2fac470b83ed0f45262202c3"},
-    {file = "bezier-2020.2.3-cp36-cp36m-win_amd64.whl", hash = "sha256:381e96f9e92057036498821ad7e45bacfb5d5f5e56ab9ea547dfdb0cb89ee93e"},
-    {file = "bezier-2020.2.3-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:56a13d962c2602daaa6eac6bdbcee50d8bcd3bc4c17feb9048462dd208c688b1"},
-    {file = "bezier-2020.2.3-cp37-cp37m-manylinux2010_i686.whl", hash = "sha256:e5f9ed2c254488fbb025baa9411b7bcaaede8761f8136103458e8186b33cbab4"},
-    {file = "bezier-2020.2.3-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:0cb232e047bcf8156f6286e6fd8276303554747689f7fd2fdb4d48b8808b9485"},
-    {file = "bezier-2020.2.3-cp37-cp37m-win32.whl", hash = "sha256:b663d868cb74c0db43185d475b78bcc3e30fc87233b866e2ac1c660ecd937c61"},
-    {file = "bezier-2020.2.3-cp37-cp37m-win_amd64.whl", hash = "sha256:63c580911f5b30aa676824626e695ec1baae1ea3391096bfbbbc124a9f0779cd"},
-    {file = "bezier-2020.2.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:49d823adb71731a8e16db988f5c15cf2e4597b0ce0d7e4285ef4758551bcbe42"},
-    {file = "bezier-2020.2.3-cp38-cp38-manylinux2010_i686.whl", hash = "sha256:789d770d54a4b949c05a1a90010aa7510fd610c292fd36bf39a3c1eae53e8545"},
-    {file = "bezier-2020.2.3-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:0221ec6362e03044db803f713220266f1350f52c5c3a9509d1fabad2ed30cf2c"},
-    {file = "bezier-2020.2.3-cp38-cp38-win32.whl", hash = "sha256:211bb41549e182fecf1cb46c2e1dfabe9d5d0dbe97b5d331a99e63dc99f5c35f"},
-    {file = "bezier-2020.2.3-cp38-cp38-win_amd64.whl", hash = "sha256:aa8fc849750d7e27958da52e1e1e26ffdf0bc76e91a93d78400b61e213e443ed"},
-    {file = "bezier-2020.2.3.tar.gz", hash = "sha256:0526631e41ac0416d4dd6be66105670bb1c1a342d4e7e82b3e9009231ac0e868"},
+    {file = "bezier-2020.5.19-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:a5dc30e6d23a8db1ce418dd3979352ac8a23befc9bea5550dd13945e14029f2e"},
+    {file = "bezier-2020.5.19-cp36-cp36m-manylinux2010_i686.whl", hash = "sha256:663f9367a071090a8a9c026851cdb31ab0fccdb1cdbf5de49822395ed9086a72"},
+    {file = "bezier-2020.5.19-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:ecd9fa0eaafe3da0ab25db16ea945efc9b4685e9c306a0d0ae22ca3a1439c79c"},
+    {file = "bezier-2020.5.19-cp36-cp36m-win32.whl", hash = "sha256:d1ad580e11f7ba3420f4f18a577f35376b6e67e39bae2aadf6b26900b2502871"},
+    {file = "bezier-2020.5.19-cp36-cp36m-win_amd64.whl", hash = "sha256:06d0aa3d841cab32261807cfe0e7ebcf3045ebc99eb0c127657d0a2f852a33ff"},
+    {file = "bezier-2020.5.19-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:622bbbd3dc341c97212b271012759824cd0c4e8eb6d51449995e444f8bc66182"},
+    {file = "bezier-2020.5.19-cp37-cp37m-manylinux2010_i686.whl", hash = "sha256:b95e6ad3d7c7f293165ce35e4e57c7c2f8f826c140bb09442383eb1ecf6b47df"},
+    {file = "bezier-2020.5.19-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:88c142070d99789793735b3427863a8d7a16ef1d3e8d5a97724d7c5e77c50942"},
+    {file = "bezier-2020.5.19-cp37-cp37m-win32.whl", hash = "sha256:2dbab0a4b084bc830d912604c29d5f1c7fcb63d844031045837ee4802ecd2bda"},
+    {file = "bezier-2020.5.19-cp37-cp37m-win_amd64.whl", hash = "sha256:34a397826321015c25550a35f791c9356b0244d27de9df92d490f885b3b4cbca"},
+    {file = "bezier-2020.5.19-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:c2f79194a18b7470c833d73c331b1cddea1935f4d364b43501afffbabcf21bf9"},
+    {file = "bezier-2020.5.19-cp38-cp38-manylinux2010_i686.whl", hash = "sha256:0df69cc1aee7f6ef6273bb8a138fbea0bb15e49420951469b0e958eabd16abf6"},
+    {file = "bezier-2020.5.19-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:55d4a16ce258f71cbf429f06aaef2def88104c714a4ce3ed78040aba94b490e8"},
+    {file = "bezier-2020.5.19-cp38-cp38-win32.whl", hash = "sha256:3d673914d68dbeb6935c90447a3bfaa0db0401b14133dbb858450e891780d2d0"},
+    {file = "bezier-2020.5.19-cp38-cp38-win_amd64.whl", hash = "sha256:74288525eba81da27cb55aacb6032aa980f18681cd81b5c7fc3efae86daa2efd"},
+    {file = "bezier-2020.5.19.tar.gz", hash = "sha256:ff75337e5bb4385376aeaa48fc941bcd61b528df43a1e938bfb07fe7d924b19c"},
 ]
 bleach = [
     {file = "bleach-3.1.5-py2.py3-none-any.whl", hash = "sha256:2bce3d8fab545a6528c8fa5d9f9ae8ebc85a56da365c7f85180bfe96a35ef22f"},
@@ -1630,8 +1637,8 @@ espatools = [
     {file = "espatools-0.1.0.tar.gz", hash = "sha256:3c0a17fc89785b46681645ea7e0879aafec3f9616ee2e8bab614463a58293d69"},
 ]
 fsspec = [
-    {file = "fsspec-0.7.3-py3-none-any.whl", hash = "sha256:9f0e3f4915b463b94c5788afa37b89d2c29c696f0d4da7d05f9cb5b17c8c84f7"},
-    {file = "fsspec-0.7.3.tar.gz", hash = "sha256:1b540552c93b47e83c568e87507d6e02993e6d1b30bc7285f2336c81c5014103"},
+    {file = "fsspec-0.7.4-py3-none-any.whl", hash = "sha256:1f9391c9b6e92a89949f0b0f7154b8b62a01f00b9c2767797d94ffa376dae9ab"},
+    {file = "fsspec-0.7.4.tar.gz", hash = "sha256:7075fde6d617cd3a97eac633d230d868121a188a46d16a0dcb484eea0cf2b955"},
 ]
 holoviews = [
     {file = "holoviews-1.13.2-py2.py3-none-any.whl", hash = "sha256:d88e89ec6d040952b8774b5aaf666b346ec79739dddc563d8cbb57e12e35cc84"},
@@ -1685,8 +1692,8 @@ ipydatawidgets = [
     {file = "ipydatawidgets-4.0.1.tar.gz", hash = "sha256:8fccd7c55d986de572813aea2ee219fa148861ff50b6b973e906a792fcbdecc0"},
 ]
 ipykernel = [
-    {file = "ipykernel-5.2.1-py3-none-any.whl", hash = "sha256:003c9c1ab6ff87d11f531fee2b9ca59affab19676fc6b2c21da329aef6e73499"},
-    {file = "ipykernel-5.2.1.tar.gz", hash = "sha256:2937373c356fa5b634edb175c5ea0e4b25de8008f7c194f2d49cfbd1f9c970a8"},
+    {file = "ipykernel-5.3.0-py3-none-any.whl", hash = "sha256:a8362e3ae365023ca458effe93b026b8cdadc0b73ff3031472128dd8a2cf0289"},
+    {file = "ipykernel-5.3.0.tar.gz", hash = "sha256:731adb3f2c4ebcaff52e10a855ddc87670359a89c9c784d711e62d66fccdafae"},
 ]
 ipympl = [
     {file = "ipympl-0.5.6-py2.py3-none-any.whl", hash = "sha256:ab3da98751c949ec50a67d35a6e55fa0f03029e0dcf9001e252299386d58473f"},
@@ -1997,8 +2004,8 @@ numpy = [
     {file = "numpy-1.18.4.zip", hash = "sha256:bbcc85aaf4cd84ba057decaead058f43191cc0e30d6bc5d44fe336dc3d3f4509"},
 ]
 packaging = [
-    {file = "packaging-20.3-py2.py3-none-any.whl", hash = "sha256:82f77b9bee21c1bafbf35a84905d604d5d1223801d639cf3ed140bd651c08752"},
-    {file = "packaging-20.3.tar.gz", hash = "sha256:3c292b474fda1671ec57d46d739d072bfd495a4f51ad01a055121d81e952b7a3"},
+    {file = "packaging-20.4-py2.py3-none-any.whl", hash = "sha256:998416ba6962ae7fbd6596850b80e17859a5753ba17c32284f67bfff33784181"},
+    {file = "packaging-20.4.tar.gz", hash = "sha256:4357f74f47b9c12db93624a82154e9b120fa8293699949152b22065d556079f8"},
 ]
 pandas = [
     {file = "pandas-1.0.3-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:d234bcf669e8b4d6cbcd99e3ce7a8918414520aeb113e2a81aeb02d0a533d7f7"},
@@ -2255,8 +2262,8 @@ send2trash = [
     {file = "Send2Trash-1.5.0.tar.gz", hash = "sha256:60001cc07d707fe247c94f74ca6ac0d3255aabcb930529690897ca2a39db28b2"},
 ]
 six = [
-    {file = "six-1.14.0-py2.py3-none-any.whl", hash = "sha256:8f3cd2e254d8f793e7f3d6d9df77b92252b52637291d0f0da013c76ea2724b6c"},
-    {file = "six-1.14.0.tar.gz", hash = "sha256:236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a"},
+    {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
+    {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
 ]
 terminado = [
     {file = "terminado-0.8.3-py2.py3-none-any.whl", hash = "sha256:a43dcb3e353bc680dd0783b1d9c3fc28d529f190bc54ba9a229f72fe6e7a54d7"},
@@ -2305,17 +2312,14 @@ vectormath = [
     {file = "vectormath-0.2.2.tar.gz", hash = "sha256:f9f9209d350ec89dc11e2548e0e6397c1b9489c8468eb50ce33788ee4322a7b8"},
 ]
 vtk = [
-    {file = "vtk-8.1.2-cp27-cp27m-macosx_10_6_x86_64.whl", hash = "sha256:ee17372ded18987480e3e07405f9b36fc4e2a0c1da1503628c4980a3957d7c98"},
-    {file = "vtk-8.1.2-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:8c6809a3526c8cf06b921dec06cd672f54baa3a050124f0f19f0adb6cf283aa4"},
-    {file = "vtk-8.1.2-cp35-cp35m-macosx_10_6_x86_64.whl", hash = "sha256:56e73eeba6402ba497a24ebdbe773cadbf01b9f7c12b3a2e26f8b40f203d718e"},
-    {file = "vtk-8.1.2-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:28df91add29d9cdd6c49235b2c65e31ab50c8655c56ad1a5914b605e22554d7d"},
-    {file = "vtk-8.1.2-cp35-cp35m-win_amd64.whl", hash = "sha256:44454f9dd6c41f20b904b41e1ac0dd06cc3367952da1a8d8d3074e1a40dce916"},
-    {file = "vtk-8.1.2-cp36-cp36m-macosx_10_6_x86_64.whl", hash = "sha256:cd68246764412e8f6855e8e73772392aa826b9d6c3d59e7544ce22af1ad7dcc8"},
-    {file = "vtk-8.1.2-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:34b43d32609d81d94a7122e388f7d6a0883138438484d0ee29158726810f6704"},
-    {file = "vtk-8.1.2-cp36-cp36m-win_amd64.whl", hash = "sha256:5c2634afaabd2243c5fbe0f4aa9cff66537cfbcb5d4893e93c31cfce878a413c"},
-    {file = "vtk-8.1.2-cp37-cp37m-macosx_10_6_x86_64.whl", hash = "sha256:110dd7d730584b2e8c13e15f1b245d1b5afb9a6e163223e1fb0e775cec818e92"},
-    {file = "vtk-8.1.2-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:d4d834d29abf98c67a63328c271e82bde3f769cbae295fb91e840bead2298d13"},
-    {file = "vtk-8.1.2-cp37-cp37m-win_amd64.whl", hash = "sha256:e790aed1a776d3682b2c38a5a795a0f46e3043f96ed113a3bbaf7ef5eaaeba08"},
+    {file = "vtk-9.0.0-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:e588afcaad2ccbf6ec6f02b78a2b9a1b33ea6f08adf992a197b9d175f07e6f2d"},
+    {file = "vtk-9.0.0-cp35-cp35m-win_amd64.whl", hash = "sha256:95fdf95a69c357ee349c1f32beac61642fd94d6009559633db7dd4e4c20e0b20"},
+    {file = "vtk-9.0.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:eb61fe7f3e6c346652720b3056a6b94a01b8d91be1480a9f907035abee074fcf"},
+    {file = "vtk-9.0.0-cp36-cp36m-win_amd64.whl", hash = "sha256:5f98d155c445dd6702730c6a4353631511987a5e768ec406ca41ad1c1bb6cecc"},
+    {file = "vtk-9.0.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:412cf376cba991cb7ee64a6b6b22855066f0b8ad7baa09e85f93b2dc433fdac8"},
+    {file = "vtk-9.0.0-cp37-cp37m-win_amd64.whl", hash = "sha256:a1dfbcd6277063087e41a642e1191c2d104559ca0b1dec9d2b117f3c34f73b20"},
+    {file = "vtk-9.0.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:c0ca8279f1faa49e048e807def14ae1297cbc855c1ba96f956a9563f2d68de83"},
+    {file = "vtk-9.0.0-cp38-cp38-win_amd64.whl", hash = "sha256:a7d4c64f3153384456b520c642b51b3128ffd794bb483ddbca9cd6632c6f703e"},
 ]
 wcwidth = [
     {file = "wcwidth-0.1.9-py2.py3-none-any.whl", hash = "sha256:cafe2186b3c009a04067022ce1dcd79cb38d8d65ee4f4791b8888d6599d1bbe1"},

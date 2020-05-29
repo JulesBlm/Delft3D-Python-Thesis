@@ -1,4 +1,4 @@
-import pandas as pd
+from pandas import DataFrame
 
 # check yDim, xDim are off by one or not
 
@@ -19,26 +19,19 @@ class Enclosure():
     Remember: Enclosure needs to be larger than boundary locations!
     '''
     def __init__(self, *args, **kwargs):
+        if not dims in kwargs:
+            raise Exception("No tuple of dimensions provided")
+
         self.dims = kwargs.get('dims')
-        
-        if not self.dims:
-            raise Exception("No tuple of dimenstinos provided?")
-        
-        self.filename = kwargs.get('filename')
-        xDim, yDim = self.dims
-        
+
         if 'channel_length_index' in kwargs:
+            print("Making enclosure that excludes channel")
             self.channel_length_index = kwargs.get("channel_length_index")
             self.bank_left = kwargs.get('bank_left')
             self.bank_right = kwargs.get('bank_right')
-            self.x = [1, self.bank_left, self.bank_left, self.bank_right, self.bank_right, xDim+1, xDim+1, 1, 1]
-            self.y = [self.channel_length_index, self.channel_length_index, 1, 1, self.channel_length_index, self.channel_length_index, yDim+1, yDim+1, self.channel_length_index]
-        elif 'read_filename' in kwargs:
-            self.x = kwargs.get('x') # list of x coords
-            self.y = kwargs.get('y') # list of y coords
+            self.makeChannelEnclosure()
         else: 
-            self.x = [1, xDim + 1, xDim + 1, 1, 1]
-            self.y = [1, 1, yDim + 1, yDim + 1, 1]
+            print("Making complete enclosure")            
 
     def __repr__(self):
         repr_string = f"New Enclosure with xDim {self.dims[0]} and yDim {self.dims[1]}"
@@ -50,18 +43,45 @@ class Enclosure():
     
     def display(self):
         enc_coords = {'x': self.x, 'y': self.y}
-        enc_coords_df = pd.DataFrame(data=enc_coords)
+        enc_coords_df = DataFrame(data=enc_coords)
 
         return display(enc_coords_df)
 
+    def makeRectEnclosure(self):
+        xDim, yDim = self.dims
+        x = [1, xDim + 1, xDim + 1, 1, 1]
+        y = [1, 1, yDim + 1, yDim + 1, 1]
+    
+        self.x = x
+        self.y = y
+        
+        return x, y    
+    
+    def makeChannelEnclosure(self):
+        x = [1, self.bank_left, self.bank_left, self.bank_right, self.bank_right, xDim+1, xDim+1, 1, 1]
+        y = [self.channel_length_index, 
+                  self.channel_length_index,
+                  1,
+                  1,
+                  self.channel_length_index,
+                  self.channel_length_index,
+                  yDim + 1,
+                  yDim+1,
+                  self.channel_length_index]
+        
+        self.x = x
+        self.y = y
+        
+        return x, y
+    
     @staticmethod
     def read(filename=None):
-        '''Read a Delft3d enclosure file. Return list of x coordinates and list of y coordinates for easy plotting of enclosure'''
+        '''Read a Delft3d enclosure file. Return Enclosure with of x coordinates and list of y coordinates'''
         if not filename:
             raise Exception("No file name supplied!")
                 
-        with open(filename, 'r') as f:
-            enc_coords = [(int(line.split("   ")[1]), int(line.split("   ")[2])) for line in f]
+        with open(filename, 'r') as enc_file:
+            enc_coords = [(int(line.split("   ")[1]), int(line.split("   ")[2])) for line in enc_file]
 
             enc_x, enc_y = zip(*enc_coords) # unzip
         
@@ -69,7 +89,7 @@ class Enclosure():
             yDim = max(enc_y)
             dims = (xDim, yDim)
             
-            # how do i know from read file has channel?
+            # how would i know from read file has channel? by nr of lines?
             enc = Enclosure(dims=dims, read_filename=True, x=enc_x, y=enc_y)
             
             enc.x = enc_x
@@ -92,7 +112,7 @@ class Enclosure():
         return self.x, self.y
         
         
-    def write(self): # Add channel_width argument
+    def write(self):
         '''
         Write enclosure file,
         * with_channel: option to ignore 'banks' around channel
@@ -101,7 +121,6 @@ class Enclosure():
             raise Exception("No enclosure filename supplied!")
         
         if not self.channel_length_index or not self.bank_left or not self.bank_right:
-            raise Exception("bank_left, bank_right, and channel_length_index keyword arguments have to be provided when excluding areas from enclosure!")
             print(" ----- Writing enclosure file excluding channel -----")
         else:
             print(" ----- Writing simple (rectangular) enclosure -----")

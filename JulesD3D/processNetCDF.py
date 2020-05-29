@@ -1,9 +1,8 @@
 # A bunch of hacky functions to prepare Delft3D-FLOW output for plotting and
 # TODO: READ ABOUT OOP
-# turn this into a class
-# turn seperate fudatasettions into classes?
+# merge some functions into a class?
 # leave it as is?
-# TODO: Use ufudatasets for vector sums
+# Use unfunctions for vector sums
 
 from JulesD3D.processing_2d import vector_sum
 import xarray as xr
@@ -12,7 +11,8 @@ from os import path
 from IPython.display import Markdown as md 
 
 # def renameConstituents
-# # attempt to rename constituents dict of indexes to sediment names but doesnt work yet
+# # attempt to rename constituents dict of indexes to sediment names for more intuitive selection
+# but doesnt work yet
 ## Also for turbulent quantities!
 # sediments = [sed.decode('UTF-8').strip() for sed in trim.NAMCON.values]
 # # # just for loop on size of seds
@@ -115,22 +115,25 @@ def addDepth(dataset):
     Add true depth coords to dataset for plotting
     TODO: Test if LAYER_INTERFACE works
     '''
-    
+
+    #### depth at cell interfaces ####    
     # Set LayOut = #Y# in mdf to get LAYER_INTERFACE in map netcdf output file written during simulation 
     # But it's a trade-off between file size and processing time  ¯\_(ツ)_/¯
-    if 'LAYER_INTERFACE' in dataset: # depth at interfaces
+
+    if 'LAYER_INTERFACE' in dataset:
+        print("LAYER_INTERFACE property alread in DataSet, renaming it to depth...")
+        # LAYER_INTERFACE has masked values set to -999
         depth = dataset.LAYER_INTERFACE 
-        
+#         dataset.rename_vars({'LAYER_INTERFACE': 'depth'}) # does this even do anyhting?
     else:
+        print("Calculating depth of interfaces...")
         depth = dataset.SIG_INTF @ dataset.DPS
-    
-        depth = depth.transpose('time', 'M', 'N', 'SIG_INTF', transpose_coords=True)
         depth = depth.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer interfaces"})
+
+    depth = depth.transpose('time', 'M', 'N', 'SIG_INTF', transpose_coords=True)
+   
     
     dataset.coords['depth'] = depth
-    
-    # [breaks since some xarray update, I forgot why it was necessary]
-    # dataset = dataset.rename_dims({'SIG_INTF': 'KMAXOUT'}) # rename SIG_INTF to KMAXOUT 
     
     ##### depth at cell centers #####
     depth_center = dataset.SIG_LYR @ dataset.DPS
@@ -139,21 +142,23 @@ def addDepth(dataset):
     depth_center = depth_center.assign_attrs({"unit": "m", "long_name": "Depth at Sigma-layer centers"})
 
     dataset.coords['depth_center'] = depth_center
-    # dataset = dataset.rename_dims({'SIG_LYR': 'KMAXOUT_RESTR'}) # rename SIG_LYR to KMAXOUT_RESTR        
-
-    # dataset.set_coords('depth_center')
+    # dataset.set_coords('depth_center') # hmmmm eeeehh 
     
-    ##### Add layer thickness DataArray to Data #####
+#     ##### Add layer thickness DataArray to Data #####
     layer_thickness = np.diff(-depth.values)
     dataset['layer_thickness'] = (depth_center.dims, layer_thickness)
     dataset['layer_thickness'].attrs = {'long_name': 'Sigma-layer thickness', 'units': 'm'}
     
     return dataset
 
+
+# This is not that useful as there are no coords to describe the positiion of the underlayer props
+# Now it just plots it how it written to file, which is different from the what it's like in the model
 def addUnderlayerCoords(dataset):
     '''
     Add underlayer coordinates to these data variables, which is nice for interactive plotting with Holoviews/hvPlot
-    TODO: Use DP_BEDLYR to set for MSED and LYRFRAC as underlayer depth coords so depth
+    This is not that useful as there are 
+    TODO: Use DP_BEDLYR to set for MSED and LYRFRAC as underlayer depth coords as depth
     '''
     
     dataset['MSED'] = dataset.MSED.assign_coords(nlyr=dataset.nlyr.values)
@@ -188,8 +193,9 @@ def makeVelocity(dataset, transpose=True, angle=False):
     # So it matches depth_center order of coords and add depth_center as coords
     # Saves time and processing power too if depth_center isn't already in dataset
     if transpose:
+        print("makeVelocity: transposing dimensions to match those of depth.")
         if not 'depth_center' in dataset:
-            print("makeVelocity: depth not in DataSet already, adding it now...")
+            print("Depth is not in DataSet already, adding it now...")
             dataset = addDepth(dataset)
         
         dataset['velocity'] = dataset.velocity.transpose('time', 'M', 'N', 'KMAXOUT_RESTR', transpose_coords=False)
@@ -265,7 +271,7 @@ def dropJunk(dataset, drop_list=[
     #     dataset_clean.load().to_netcdf('clean_compressed_sampleD3D.dataset', mode='w', engine='netcdf4', format='NETCDF4')     
     
     # Remove component DataArrays from DataSet
-    print("Dropping a budataseth of DataArrays from DataSet...", end='')
+    print("Dropping a bunch of DataArrays from DataSet...", end='')
     
     dataset = dataset.drop_vars(drop_list, errors='ignore')    
     print('Done dropping variables.')    
