@@ -18,17 +18,20 @@ colormap = deep
 its a start but its still a big mess
 i really should read up on object oriented in Python
 write the filenames to mdf (Filbnd, FilbcC) and bcc (TimeSeries) files
+store all shared params here
 Keep track of sediment names > sed mor files
 Keep track of boundary labels > bnd bcc bct files
 Keep track of dimensions > grid, depth, enc files
+Check if mdf final time is multiple of outputtimestep, crucial or multi-runs
+Ensure all times are multiple of time-step!
 '''
-
 
 class D3DModel(object):
     """
     Read a folder containing Delft3D4-FLOW files
     Displays all properties of model in a human readable overview
     Some convenient plot methods 
+
     """
     def __init__(self, folderpath=None, *args, **kwargs):
         if not folderpath:

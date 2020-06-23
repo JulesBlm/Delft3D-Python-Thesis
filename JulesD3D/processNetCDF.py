@@ -14,14 +14,14 @@ from IPython.display import Markdown as md
 # # attempt to rename constituents dict of indexes to sediment names for more intuitive selection
 # but doesnt work yet
 ## Also for turbulent quantities!
-# sediments = [sed.decode('UTF-8').strip() for sed in trim.NAMCON.values]
+# sediments = [sed.decode('UTF-8').strip() for sed in dataset.NAMCON.values]
 # # # just for loop on size of seds
 # aye_dict = {
 #     0: sediments[0],
 #     1: sediments[1]
 # }
-# trim['LSTSCI'] = sediments
-# renamed = trim.rename_dims({'LSTSCI': 'sed'})
+# dataset['LSTSCI'] = sediments
+# renamed = dataset.rename_dims({'LSTSCI': 'sed'})
 # renamed.sed
 
 # Or just check the dummy cells out
@@ -153,12 +153,12 @@ def addDepth(dataset):
 
 
 # This is not that useful as there are no coords to describe the positiion of the underlayer props
-# Now it just plots it how it written to file, which is different from the what it's like in the model
+# Now it just plots it how these values are written to file, which is different from the what it's like in the model
+# I'd really need to follow DP_BEDLYR to set for MSED and LYRFRAC as underlayer depth coords as depth
 def addUnderlayerCoords(dataset):
     '''
     Add underlayer coordinates to these data variables, which is nice for interactive plotting with Holoviews/hvPlot
     This is not that useful as there are 
-    TODO: Use DP_BEDLYR to set for MSED and LYRFRAC as underlayer depth coords as depth
     '''
     
     dataset['MSED'] = dataset.MSED.assign_coords(nlyr=dataset.nlyr.values)
@@ -170,7 +170,8 @@ def addUnderlayerCoords(dataset):
     
     return dataset
 
-# This only works for sets that don;t have nested values
+# Does this work for DataArray that have have nested values like RTUR1 (turbulent quantities) or LYRFRAC (bed vol. fraction)?
+# Should add option to calculate angle too! For vectorfield plots
 def addVectorSum(dataset, U_comp, V_comp, key="summed", attrs={}, dims=('time', 'M', 'N')):
     '''Adds summed DataArray to new key in DataSet and drops components from DataSet'''
     summed = vector_sum(dataset[U_comp].values, dataset[V_comp].values)
@@ -183,11 +184,12 @@ def addVectorSum(dataset, U_comp, V_comp, key="summed", attrs={}, dims=('time', 
 
 # velocity is special thats why it gets its own function
 # TODO add velocity angle here too
+# why did I name this makeVelocity instead of addVelocity?
 def makeVelocity(dataset, transpose=True, angle=False):
     
     # Make Horizontal velocity sum per layer
     velocity_sum = vector_sum(dataset.U1.values, dataset.V1.values) # Velocity per layer
-    dataset['velocity'] = (('time', 'KMAXOUT_RESTR', 'M', 'N'), velocity_sum) # xr.DataArray
+    dataset['velocity'] = (('time', 'KMAXOUT_RESTR', 'M', 'N'), velocity_sum)
     dataset['velocity'].attrs = {'long_name': 'Horizontal velocity per layer', 'units': 'm/s', 'grid': 'grid', 'location': 'edge1'}
     
     # So it matches depth_center order of coords and add depth_center as coords
@@ -357,8 +359,9 @@ def writeCleanDataset(dataset_filename, chunks=10, mystery_flag=False):
 # Things blew up when there are many multi-dimensional coords I think? eg depth, depth_center, N_KMAXOUT_RESTR, M_KMAXOUT_RESTR, N_KMAXOUT, M_KMAXOUT
 # Think holoviews gets confused about which coords to take when there are 6 different multi-dimensional options
 # How to add multiple kwargs that do the kinda the same thing? ie along_length along_width
-def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False, N=0, M=0):
+def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False, M=0, N=0):
     '''
+    At cell centers!
     Returns DataArray that has extra coords meshgrid for convenient vertical plotting
     By default along length, set to along_length=False to get section along width
     TODO: proper time-dependant vertical meshgrid
@@ -371,6 +374,9 @@ def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False, N=
         dataset = addDepth(dataset)
     if along_width: # kinda ugly solution
         along_length = False
+    if 'XCOR' in dataset[keyword].coords:
+        print("This keyword is defined at cell interfaces, passing to makeVerticalSliceCOR function instead of this one")
+        return makeVerticalSliceCOR(dataset, keyword, along_length=along_length, along_width=along_width, MC=M, NC=N)
         
     # check if this DataArray is really at centers
     if 'KMAXOUT_RESTR' in dataset[keyword].dims:
@@ -419,6 +425,75 @@ def makeVerticalSlice(dataset, keyword, along_length=True, along_width=False, N=
                                         attrs={'units':'m', 'long_name': 'X-SIG_INTF Meshgrid'})
 
             vertical_slice.coords["M_KMAXOUT"] = M_KMAXOUT
+    else:
+        raise Exception('This DataArray does not have the right dimensions (KMAXOUT or KMAXOUT_RESTR)')
+    
+    return vertical_slice
+
+# Super ugly solution but ok
+def makeVerticalSliceCOR(dataset, keyword, along_length=True, along_width=False, MC=0, NC=0):
+    '''
+    At cell interfaces! For vorticity and the turbulent quantities
+    Returns DataArray that has extra coords meshgrid for convenient vertical plotting
+    By default along length, set to along_length=False to get section along width
+    TODO: proper time-dependent vertical meshgrid
+    TODO: selecting the 0th index of YCOR or XCOR only works if the grid is uniform rectilinear
+    '''
+    if keyword not in dataset:
+        raise Exception(f"Can't find {keyword} in DataSet")
+    if not 'depth_center' in dataset or not 'depth' in dataset:
+        print("Adding depths to DataSet...")
+        dataset = addDepth(dataset)
+    if along_width: # kinda ugly solution
+        along_length = False
+        
+    # check if this DataArray is really at centers
+    if 'KMAXOUT_RESTR' in dataset[keyword].dims:
+        # add depth center coords
+        vertical_slice = dataset[keyword].assign_coords(depth_center=(
+            ('time', 'MC', 'NC', 'KMAXOUT_RESTR'), dataset.depth_center.values)
+        )
+
+        if along_length:
+            # make a mesh grid along length
+            mesh_NC_siglyr, _ = xr.broadcast(dataset.YCOR[0], dataset.SIG_LYR)
+
+            NC_KMAXOUT_RESTR = xr.DataArray(mesh_NC_siglyr, dims=['NC', 'KMAXOUT_RESTR'], 
+                                    coords={'NC': dataset.NC, 'KMAXOUT_RESTR': dataset.KMAXOUT_RESTR},
+                                    attrs={'units':'m', 'long_name': 'YCOR-SIG_LYR Meshgrid'})
+
+            vertical_slice.coords["NC_KMAXOUT_RESTR"] = NC_KMAXOUT_RESTR   
+        else: 
+            mesh_MC_siglyr, _ = xr.broadcast(dataset.XCOR[:,0], dataset.SIG_LYR)
+
+            MC_KMAXOUT_RESTR = xr.DataArray(mesh_MC_siglyr, dims=['MC', 'KMAXOUT_RESTR'], 
+                                        coords={'MC': dataset.MC, 'KMAXOUT_RESTR': dataset.KMAXOUT_RESTR},
+                                        attrs={'units': 'm', 'long_name': 'XCOR-SIG_LYR Meshgrid'})
+
+            vertical_slice.coords["M_KMAXOUT_RESTR"] = M_KMAXOUT_RESTR   
+
+    elif 'KMAXOUT' in dataset[keyword].dims:
+        # add depth center coords
+        vertical_slice = dataset[keyword].assign_coords(depth=(
+            ('time', 'MC', 'NC', 'KMAXOUT'), dataset.depth.values)
+        )
+
+        if along_length:
+            mesh_N_intf, _ = xr.broadcast(dataset.YCOR[0], dataset.SIG_INTF)
+
+            NC_KMAXOUT = xr.DataArray(mesh_N_intf, dims=['NC', 'KMAXOUT'], 
+                                    coords={'NC': dataset.NC, 'KMAXOUT': dataset.KMAXOUT},
+                                    attrs={'units': 'm', 'long_name': 'YCOR-SIG_INTF Meshgrid'})
+
+            vertical_slice.coords["NC_KMAXOUT"] = NC_KMAXOUT
+        else:
+            mesh_M_lyr, _ = xr.broadcast(dataset.XCOR[:,0], dataset.SIG_INTF)
+
+            MC_KMAXOUT = xr.DataArray(mesh_N_lyr, dims=['M', 'KMAXOUT'], 
+                                        coords={'M': dataset.MC, 'KMAXOUT': dataset.KMAXOUT},
+                                        attrs={'units':'m', 'long_name': 'XCOR-SIG_INTF Meshgrid'})
+
+            vertical_slice.coords["MC_KMAXOUT"] = MC_KMAXOUT
     else:
         raise Exception('This DataArray does not have the right dimensions (KMAXOUT or KMAXOUT_RESTR)')
     

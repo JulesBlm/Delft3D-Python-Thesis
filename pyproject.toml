@@ -3,7 +3,7 @@ name = "Delft3D-Python-Thesis"
 version = "0.1.0"
 description = "Some functions and notebooks to view Delft3D-Flow output"
 authors = ["JulesBlm <julesblom@gmail.com>"]
-license = "BSD"
+license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -13,7 +13,7 @@ datashader = "^0.10.0"
 dask = {extras = ["dataframe"], version = "^2.11.0"}
 widgetsnbextension = "^3.5.1"
 netcdf4 = "^1.5.3"
-jupyterlab = "1.2.0"
+jupyterlab = "2.1.5"
 holoviews = "^1.12.7"
 numpy = "^1.18.1"
 xarray = "^0.15.0"
@@ -29,7 +29,7 @@ pyvista = "^0.23.1"
 pvgeo = "^2.1.0"
 colorcet = "^2.0.2"
 xarray-extras = "^0.4.2"
-bokeh = "^2.0.1"
+jsonschema = "^3.2.0"
 
 [tool.poetry.dev-dependencies]
 
