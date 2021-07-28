@@ -1,7 +1,7 @@
 # Delft3D-FLOW Python Tools for humans
 ### Declarative Delft3D-FLOW file generation and visualisation
 
-## I will soon organize and split the functionality and clean the notebooks in this repo in [a seperate repo](https://github.com/JulesBlm/pyDelft3D-FLOW)
+## See the organized scripts and clean notebooks [here: pyDelft3D-FLOW](https://github.com/JulesBlm/pyDelft3D-FLOW)
 
 Some sane tools for my thesis too ease the pain of having to work with Deltares' [Delft3D-FLOW](https://oss.deltares.nl/documents/183920/185723/Delft3D-FLOW_User_Manual.pdf)'s insane file formats and to automate the tedious manual labor involved in setting up multiple succesive simulations. Also processes NetCDF for plotting with Holoviews and PyVista.
 
